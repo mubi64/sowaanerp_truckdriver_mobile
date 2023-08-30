@@ -13,14 +13,11 @@ import {
   moderateScale,
 } from '../helpers/responsive';
 import CalendarStrip from 'react-native-calendar-strip';
-import {Icon} from '@rneui/base';
-import {TextInput} from 'react-native';
-import { httpPOST, httpGet } from '../network calls/networkCalls';
 import moment from 'moment';
 import { useAuth } from '../context/auth-context';
 import { Toast } from 'react-native-toast-message/lib/src/Toast';
-
-
+import { useFocusEffect,useNavigation} from '@react-navigation/native';
+import { httpGet } from '../network calls/networkCalls';
 
 const HomeScreen = (props) => {
   const [dataArray, setDataArray] = React.useState([])
@@ -28,12 +25,17 @@ const HomeScreen = (props) => {
   const [refresh,setRefresh] = React.useState(false)
   const { user, logout, login } = useAuth();
   const [load, setLoad] = React.useState(true)
-
+  useFocusEffect(
+    React.useCallback(() => {
+      // Your code here
+      getDeliveryTrip();
+      return () => {
+        // Clean up code here
+      };
+    }, [])
+  )
   
-  React.useEffect(() => {
-    getDeliveryTrip();
-    
-  }, [])
+ 
   const getDeliveryTripByDate = async (date) => {
      setLoad(true)
     const getTripsResponse = await httpGet(`/api/resource/Delivery Trip?limit_page_length=5000&fields=["*"]&filters=[["docstatus","=",1],["status","!=","Completed"],["departure_time","between",["${date}","${date}"]]]`)
@@ -84,6 +86,7 @@ const HomeScreen = (props) => {
     const setmin = minDate.setDate(min)
     return setmin
   }
+
     return (
     <>
     <View style={{ flex: 1, backgroundColor: BACKGROUND_COLOR }}>

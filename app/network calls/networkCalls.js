@@ -3,7 +3,7 @@ export const httpGet = async url => {
   try {
     //const BaseUrl = await GetItem('BASEURL');
   
-    let response = await fetch(`${'http://192.168.0.177:8001'}${url}`,{
+    let response = await fetch(`${'http://192.168.1.163:8001'}${url}`,{
                 method:"GET",
                 headers: {
                   'Content-Type': 'application/json;charset=UTF-8',
@@ -119,7 +119,7 @@ export const httpPOST = async (url, data) => {
   try {
   //const BaseUrl = await GetItem('BASEURL');
 
-  let response = await fetch(`${"http://192.168.0.177:8001"}${url}`,{
+  let response = await fetch(`${"http://192.168.1.163:8001"}${url}`,{
               method:"POST",
               headers: {
                 'Content-Type': 'application/json;charset=UTF-8',
@@ -165,7 +165,7 @@ export const httpPUT = async (url, data) => {
   try {
   //const BaseUrl = await GetItem('BASEURL');
 
-  let response = await fetch(`${"http://192.168.0.177:8001"}${url}`,{
+  let response = await fetch(`${"http://192.168.1.163:8001"}${url}`,{
               method:"PUT",
               headers: {
                 'Content-Type': 'application/json;charset=UTF-8',

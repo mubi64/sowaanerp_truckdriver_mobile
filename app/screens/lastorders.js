@@ -18,6 +18,7 @@ import CalendarStrip from 'react-native-calendar-strip';
 import {Icon} from '@rneui/base';
 import {TextInput} from 'react-native';
 import { httpPOST, httpGet } from '../network calls/networkCalls';
+import { Toast } from 'react-native-toast-message/lib/src/Toast';
 const maxDate = new Date();
 const theDayOfTheMonthOnNextWeek = maxDate.getDate() + 7;
 const theDayOfTheMonthOnTodayWeek = maxDate.getDate();
@@ -52,7 +53,7 @@ const LastOrder = (props) => {
   }
   const getDeliveryTripByDate = async (date) => {
     setLoad(true)
-   const getTripsResponse = await httpGet(`/api/resource/Delivery Trip?limit_page_length=5000&fields=["*"]&filters=[["docstatus","=",1],["status","!=","Completed"],["departure_time","between",["${date}","${date}"]]]`)
+   const getTripsResponse = await httpGet(`/api/resource/Delivery Trip?limit_page_length=5000&fields=["*"]&filters=[["docstatus","=",1],["status","=","Completed"],["departure_time","between",["${date}","${date}"]]]`)
    if (getTripsResponse.error != undefined) {
      Toast.show({
        type: 'error',

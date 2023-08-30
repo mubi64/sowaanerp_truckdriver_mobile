@@ -72,6 +72,11 @@ const DetailsScreen = props => {
     outputRange: [verticalScale(-419.5), 0],
     extrapolate: 'clamp',
   });
+  const getTextWithoutHTMLTags = (text) => {
+    const regex = /(<([^>]+)>)/gi;
+    const newString = text.replace(regex, " ");
+    return newString
+  }
   const getCurrentLocation = () => {
     GetLocation.getCurrentPosition({
       enableHighAccuracy: true,
@@ -228,7 +233,7 @@ React.useEffect(() => {
                     fontSize: moderateScale(16),
                   }}>
                   {' '}
-                  {nextStop?.customer_address}{' '}
+                  {getTextWithoutHTMLTags(nextStop?.customer_address)}{' '}
                 </Text>
               </View>
             </Callout>
@@ -238,7 +243,7 @@ React.useEffect(() => {
           <MapViewDirections
             origin={{latitude: lat, longitude: long}}
             destination={{latitude: nextStop?.lat, longitude: nextStop?.lng}}
-            apikey={''}
+            apikey={'AIzaSyA5fjkfAcccfm9Pl8ELukL95qTk6AIzwp4'}
             strokeWidth={3}
             strokeColor={SECONDARY_COLOR}
           />
