@@ -238,7 +238,7 @@ React.useEffect(() => {
           <MapViewDirections
             origin={{latitude: lat, longitude: long}}
             destination={{latitude: nextStop?.lat, longitude: nextStop?.lng}}
-            apikey={'AIzaSyA5fjkfAcccfm9Pl8ELukL95qTk6AIzwp4'}
+            apikey={''}
             strokeWidth={3}
             strokeColor={SECONDARY_COLOR}
           />
