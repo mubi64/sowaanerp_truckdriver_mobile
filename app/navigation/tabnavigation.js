@@ -8,12 +8,12 @@ import {HomeStack,LastOrderStack} from './stacknavigation';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { horizontalScale, moderateScale, verticalScale } from '../helpers/responsive';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
+import ProfileScreen from '../screens/profile';
 const Tab = createBottomTabNavigator();
 function MyTabBar({ state, descriptors, navigation }) {
-  console.log('state',state)
+ 
   const focusedOptions = descriptors[state.routes[state.index].key].options;
-
+  console.log('state',focusedOptions)
   if (focusedOptions.tabBarVisible === false) {
     return null;
   }
@@ -64,14 +64,18 @@ function MyTabBar({ state, descriptors, navigation }) {
             {(isFocused)?
               <View
               style={{
-                  width: horizontalScale(187.5), height: verticalScale(120), justifyContent: "center", alignItems: "center", backgroundColor: { PRIMARY_COLOR }// IOS
+                  width: horizontalScale(125), height: verticalScale(120), justifyContent: "center", alignItems: "center", backgroundColor: { PRIMARY_COLOR }// IOS
                   
               }}
           >
           {(route.name==="Home")?  
           <Icon name="home" type="font-awesome-5" color={SECONDARY_COLOR} size={moderateScale(20)} />
-          :
+                  :
+                  (route.name==="LastOrder")?
           <Icon name="CodeSandbox" type="antdesign" color={SECONDARY_COLOR} size={moderateScale(20)} />
+                    :
+                    <Icon name="user" type="font-awesome" color={SECONDARY_COLOR} size={moderateScale(20)} />
+
         }
 <Text style={{ color:PRIOR_FONT_COLOR,fontFamily:"CenturyGothic",fontSize:moderateScale(12) }}>
     {label}
@@ -80,15 +84,19 @@ function MyTabBar({ state, descriptors, navigation }) {
               :
               <View
               style={{
-                width: horizontalScale(187.5), height: verticalScale(120), justifyContent: "center", alignItems: "center", backgroundColor: { PRIMARY_COLOR }// IOS
+                width: horizontalScale(125), height: verticalScale(120), justifyContent: "center", alignItems: "center", backgroundColor: { PRIMARY_COLOR }// IOS
                 
             }}
               >
                 {
         (route.name==="Home")?
         <Icon name="home" type="font-awesome-5" color={LOW_PRIOR_FONT_COLOR} size={moderateScale(20)}  />
-        :
+                    :
+                    (route.name==="LastOrder")?
                 <Icon name="CodeSandbox" type="antdesign" color={LOW_PRIOR_FONT_COLOR} size={moderateScale(20)} />
+                      :
+                      <Icon name="user" type="font-awesome" color={LOW_PRIOR_FONT_COLOR} size={moderateScale(20)} />
+
             }
               </View>
           
@@ -128,18 +136,23 @@ function MyTabs() {
                   }
                   return 
           })(route),
+          tabBarVisible:true,
           //tabBarLabel: 'Home',
-    
+            
             tabBarLabel:"Home",
         
         })
+          
         }
+      
       />
       <Tab.Screen
         name="LastOrder"
         component={LastOrderStack}
         options={({ route }) => ({
           tabBarLabel: 'Last Order',
+          tabBarVisible:true,
+
           tabBarStyle:  ((route) => {
             const routeName = getFocusedRouteNameFromRoute(route) ?? ""
             if (routeName ==='Details' ) {
@@ -149,7 +162,15 @@ function MyTabs() {
           })(route)
         })}
       />
-    
+       <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={({ route }) => ({
+          tabBarLabel: 'Profile',
+          tabBarVisible:true,
+
+        })}
+      />
     </Tab.Navigator>
   );
 }

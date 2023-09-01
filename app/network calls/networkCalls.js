@@ -1,9 +1,9 @@
-
+import { GetItem } from "../async-storage/async-storage";
 export const httpGet = async url => {
   try {
-    //const BaseUrl = await GetItem('BASEURL');
+    const BaseUrl = await GetItem('BASEURL');
   
-    let response = await fetch(`${'http://192.168.1.163:8001'}${url}`,{
+    let response = await fetch(`${BaseUrl}${url}`,{
                 method:"GET",
                 headers: {
                   'Content-Type': 'application/json;charset=UTF-8',
@@ -117,9 +117,9 @@ const get_set_cookies = function(headers) {
 export const httpPOST = async (url, data) => {
   // let netInfo = await NetInfo.fetch();
   try {
-  //const BaseUrl = await GetItem('BASEURL');
-
-  let response = await fetch(`${"http://192.168.1.163:8001"}${url}`,{
+  const BaseUrl = await GetItem('BASEURL');
+  console.log('ted',BaseUrl)
+  let response = await fetch(`${BaseUrl}${url}`,{
               method:"POST",
               headers: {
                 'Content-Type': 'application/json;charset=UTF-8',
@@ -163,9 +163,9 @@ export const httpPOST = async (url, data) => {
 export const httpPUT = async (url, data) => {
   // let netInfo = await NetInfo.fetch();
   try {
-  //const BaseUrl = await GetItem('BASEURL');
+  const BaseUrl = await GetItem('BASEURL');
 
-  let response = await fetch(`${"http://192.168.1.163:8001"}${url}`,{
+  let response = await fetch(`${BaseUrl}${url}`,{
               method:"PUT",
               headers: {
                 'Content-Type': 'application/json;charset=UTF-8',

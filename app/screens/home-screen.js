@@ -57,7 +57,9 @@ const HomeScreen = (props) => {
   }
   const getDeliveryTrip = async () => {
  
-    const getTripsResponse = await httpGet(`/api/resource/Delivery Trip?limit_page_length=5000&fields=["*"]&filters=[["docstatus","=",1],["status","!=","Completed"],["departure_time","between",["${moment().format('DD-MM-YYYY')}","${moment().format('DD-MM-YYYY')}"]]]`)
+   const getTripsResponse = await httpGet(`/api/resource/Delivery Trip?limit_page_length=5000&fields=["*"]&filters=[["docstatus","=",1],["status","!=","Completed"],["departure_time","between",["${moment().format('DD-MM-YYYY')}","${moment().format('DD-MM-YYYY')}"]]]`)
+   // const getTripsResponse = await httpGet(`/api/resource/Delivery Trip?limit_page_length=5000&fields=["*"]&filters=[["docstatus","=",1],["status","!=","Completed"]]`)
+
     if (getTripsResponse.error != undefined) {
       Toast.show({
         type: 'error',
@@ -130,7 +132,7 @@ const HomeScreen = (props) => {
               of orders
             </Text>
           </View>
-          <Text
+          {/* <Text
             style={{
               fontFamily: 'Outfit-Regular',
               color: SECONDARY_COLOR,
@@ -140,7 +142,7 @@ const HomeScreen = (props) => {
           onPress={()=>logout()}
           >
           Logout
-          </Text>
+          </Text> */}
         </View>
         <View
           style={{

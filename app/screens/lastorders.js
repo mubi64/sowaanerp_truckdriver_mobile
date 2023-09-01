@@ -110,7 +110,7 @@ const LastOrder = (props) => {
                 fontSize: moderateScale(35),
                 alignSelf: 'center',
               }}>
-              of orders
+              of past orders
             </Text>
           </View>
           <Text

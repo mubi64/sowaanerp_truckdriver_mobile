@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useRef} from 'react';
 import {
   View,
   Text,
@@ -6,9 +6,10 @@ import {
   Image,
   Dimensions,
   Animated,
-  ScrollView,
   TouchableOpacity,
-  ActivityIndicator
+  ActivityIndicator,
+  PanResponder,
+  
 } from 'react-native';
 import {
   BACKGROUND_COLOR,
@@ -28,7 +29,7 @@ import {Icon, Divider} from '@rneui/base';
 import {TextInput} from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker, Callout} from 'react-native-maps';
 // remove PROVIDER_GOOGLE import if not using Google Maps
-import {PanGestureHandler} from 'react-native-gesture-handler';
+import {PanGestureHandler,ScrollView} from 'react-native-gesture-handler';
 import {httpGet} from '../network calls/networkCalls';
 import moment from 'moment';
 import { useFocusEffect,useNavigation} from '@react-navigation/native';
@@ -40,12 +41,14 @@ import Toast from 'react-native-toast-message';
 const widthScreen = Dimensions.get('window').width;
 const heightScreen = Dimensions.get('window').height;
 const DetailsScreen = props => {
+  const scrollViewRef = useRef(null);
   const [lat, setLat] = React.useState(24.8601);
   const [long, setLong] = React.useState(67.0565);
   const [visited, setVisited] = React.useState([]);
   const [animationBottom] = React.useState(new Animated.Value(0));
   const [longDelta, setLongDelta] = React.useState(0.03);
   const [check, setCheck] = React.useState(false);
+  const [paddingBottomVal,setPaddingBottom]= React.useState(0)
   const [singleDeliveryTrip, setSingleDeliveryTrip] = React.useState({});
   const [latDelta, setLatDelta] = React.useState(
     0.03 * (widthScreen / heightScreen),
@@ -69,7 +72,7 @@ const DetailsScreen = props => {
   };
   const actionSheetInterpolate = animationBottom.interpolate({
     inputRange: [0, 1],
-    outputRange: [verticalScale(-419.5), 0],
+    outputRange: [verticalScale(-519.5), 0],
     extrapolate: 'clamp',
   });
   const getTextWithoutHTMLTags = (text) => {
@@ -173,8 +176,29 @@ React.useEffect(() => {
         });
         console.log('error', updateResponse.error);
       } else {
+        //props.navigation.goBack()
+        const checkVisited = updateResponse.Data.delivery_stops.filter(
+          item => {
+            return item.visited == 1;
+          },
+        );
+        if (checkVisited.length > 0) {
+          setVisited(checkVisited);
+        }
+        const checkunVisted = updateResponse.Data.delivery_stops.filter(
+          item => {
+            return item.visited == 0;
+          },
+        );
+
+        if (checkunVisted.length > 0) {
+          setNextStop(checkunVisted[0]);
+        }
+        else {
+          setNextStop({})
+        }
         setLoad(false)
-        props.navigation.goBack()
+         setCheck(false)
         console.log('success', JSON.stringify(updateResponse, null, 2));
       }
     } else {
@@ -185,6 +209,10 @@ React.useEffect(() => {
       });
     }
   };
+  const handleScrollContentLayout = (e) => {
+    const { height } = e.nativeEvent.layout
+    setScrollLayoutHeight(height)
+  }
   return (
     <>
       <MapView
@@ -318,6 +346,8 @@ React.useEffect(() => {
       <PanGestureHandler
         // activeOffsetX={[-10, 10]}
         /* or */
+        //activeOffsetY={[-10, 10]}
+        
         activeOffsetY={[-10, 10]}
         onGestureEvent={e => {
           if (e.nativeEvent.translationY < 0) {
@@ -326,13 +356,16 @@ React.useEffect(() => {
             endUpActionSheet();
           }
         }}>
+           
         <Animated.View
           style={{
             width: horizontalScale(375),
-            height: verticalScale(565.4),
+            height: verticalScale(665.4),
             position: 'absolute',
             bottom: actionSheetInterpolate,
           }}>
+         
+ 
           <View
             style={{
               backgroundColor: PRIMARY_COLOR,
@@ -435,11 +468,23 @@ React.useEffect(() => {
               borderColor: LIGHT_GREY,
             }}
           />
+          
+      <ScrollView ref={scrollViewRef}
+            contentContainerStyle={{  backgroundColor: 'white'}}
+            style={{ flex: 1 }}
+
+       
+            onContentSizeChange={(w, h) => {
+             console.log(h)
+           }}
+          >
+            
           <View
             style={{
-              height: verticalScale(419.5),
+              height: verticalScale(519.5),
               width: horizontalScale(375),
-              backgroundColor: PRIMARY_COLOR,
+                backgroundColor: PRIMARY_COLOR,
+          
             }}>
             <View
               style={{
@@ -664,8 +709,12 @@ React.useEffect(() => {
                 </View>
               ) : null}
             </View>
-
-            <TouchableOpacity
+            
+            </View>
+           {/* <View style={{height:verticalScale(550/3.5)}}></View>  */}
+            </ScrollView>
+         
+          <TouchableOpacity
               style={{
                 width: horizontalScale(265),
                 height: verticalScale(50),
@@ -686,8 +735,8 @@ React.useEffect(() => {
                 }}>
                 Complete
               </Text>
-            </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
+    
         </Animated.View>
       </PanGestureHandler>
   

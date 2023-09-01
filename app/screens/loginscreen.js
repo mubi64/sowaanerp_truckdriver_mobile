@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   ActivityIndicator
 } from 'react-native';
-
+import { StoreItem,GetItem } from '../async-storage/async-storage';
 import {Input, Icon} from '@rneui/base';
 import { horizontalScale,verticalScale,moderateScale } from '../helpers/responsive';
 import { BACKGROUND_COLOR, PRIOR_FONT_COLOR, SECONDARY_COLOR,PRIMARY_COLOR } from '../assets/colors/colors';
@@ -23,8 +23,23 @@ const LoginScreen = (props) => {
   const [password, setPassword] = useState('');
   const [load,setLoad] = React.useState(false)
   const [loader, setLoader] = useState(false)
-  const signIn = async()=>{
-    if(eemail === '' || password === ''){
+  const [linkText, setLinkText] = useState('')
+  React.useEffect(() => {
+    const fetchUrl = async() => {
+      const BaseUrl = await GetItem('BASEURL');
+      if (BaseUrl !== null) {
+      
+           setLinkText(BaseUrl.replace(/^http?:\/\//, ''))
+      }
+      
+    }
+    
+    fetchUrl()
+    
+  },[])
+  const signIn = async () => {
+    
+    if(eemail === '' || password === '' || linkText === ''){
       Toast.show({
         type: 'error',
         position:"top",
@@ -33,8 +48,9 @@ const LoginScreen = (props) => {
     }
     else {
       setLoad(true)
+      await StoreItem('BASEURL', `http://${linkText.trim()}`)
       const res= await httpPOST(
-        '/api/method/login',
+        `/api/method/login`,
         {
           usr: eemail,
           pwd: password,
@@ -67,9 +83,9 @@ const LoginScreen = (props) => {
       <View style={{ height: verticalScale(56.84) }} />
       <View
           style={{
-            width: horizontalScale(150),
-            height: horizontalScale(150),
-            borderRadius: horizontalScale(150) / 2,
+            width: horizontalScale(120),
+            height: horizontalScale(120),
+            borderRadius: horizontalScale(120) / 2,
             alignSelf: 'center',
             backgroundColor: 'white',
             justifyContent: 'center',
@@ -161,7 +177,8 @@ const LoginScreen = (props) => {
                 size={moderateScale(16)}
               />
             }
-          />
+        />
+        
           <Input
             allowFontScaling={false}
             placeholder="Password"
@@ -223,7 +240,55 @@ const LoginScreen = (props) => {
               </>
             }
             rightIconContainerStyle={{marginRight:horizontalScale(10)}}
-          />
+        />
+         <Input
+            allowFontScaling={false}
+            keyboardType="url"
+          placeholder="Domain Link"
+        value={linkText}
+          onChangeText={text => {
+            // if (text.length > 7) {
+            //   setLinkText(linkText+text)
+            //    }
+            console.log(text)
+              setLinkText(text)
+            } }
+            containerStyle={{width: horizontalScale(330), alignSelf: 'center',marginTop:verticalScale(10)}}
+            inputContainerStyle={{
+              borderRadius: 8,
+              borderColor: '#F4F4F4',
+              borderWidth: 2,
+              paddingLeft: 10,
+              fontSize: moderateScale(16),
+              marginTop: verticalScale(-1.5),
+              color: '#3B3B3B',
+              fontFamily: 'Proxima Nova',
+              backgroundColor: 'white',
+              shadowColor: '#000',
+              shadowOffset: {
+                width: 0,
+                height: 9,
+              },
+              shadowOpacity: 0.48,
+              shadowRadius: 11.95,
+              elevation: 2,
+            }}
+            inputStyle={{
+              fontSize: moderateScale(16),
+              color: '#3B3B3B',
+              fontFamily: 'Proxima Nova',
+            }}
+          
+           
+            leftIcon={
+              <Icon
+                name="link"
+                type="material"
+                color={SECONDARY_COLOR}
+                size={moderateScale(16)}
+              />
+            }
+        />
        
        <TouchableOpacity
               style={{
@@ -281,8 +346,8 @@ const styles = StyleSheet.create({
     backgroundColor: BACKGROUND_COLOR,
   },
   logoImageSize: {
-    width: 80,
-    height: 80,
+    width:horizontalScale(90),
+    height:verticalScale(80),
     alignSelf: 'center',
   },
 });
