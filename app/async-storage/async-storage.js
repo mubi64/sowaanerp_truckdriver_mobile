@@ -2,12 +2,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 
 
-export const GetItem = async(key)=>{
+export const GetItem = async (key) => {
 
-  var getValue= await AsyncStorage.getItem('@'+key).then(success=>{
+  var getValue = await AsyncStorage.getItem('@' + key).then(success => {
     return success
-  }).catch(err=>{
-   return err
+  }).catch(err => {
+    return err
   })
   return getValue
 
@@ -26,31 +26,31 @@ export const GetItem = async(key)=>{
 
   // }
 }
-export const DeleteItem = async(key)=>{
-  var getValue= await AsyncStorage.removeItem('@'+key).then(success=>{
+export const DeleteItem = async (key) => {
+  var getValue = await AsyncStorage.removeItem('@' + key).then(success => {
     //console.log("DELETE")
     return success
-  }).catch(err=>{
-   return err
+  }).catch(err => {
+    return err
   })
   return getValue
 }
 
-export const StoreItem = async(key,value)=>{
-    if(typeof value === "string"){
-        try {
-            await AsyncStorage.setItem(`@${key}`, value)
-          } catch (e) {
-          }
+export const StoreItem = async (key, value) => {
+  if (typeof value === "string") {
+    try {
+      await AsyncStorage.setItem(`@${key}`, value)
+    } catch (e) {
     }
-    else{
-      try {
+  }
+  else {
+    try {
 
-        const jsonValue = JSON.stringify(value)
-        await AsyncStorage.setItem(`@${key}`, jsonValue)
-      } catch (e) {
-        console.log("Async Error ",e);
-      }
+      const jsonValue = JSON.stringify(value)
+      await AsyncStorage.setItem(`@${key}`, jsonValue)
+    } catch (e) {
+      console.log("Async Error ", e);
     }
-    
+  }
+
 }

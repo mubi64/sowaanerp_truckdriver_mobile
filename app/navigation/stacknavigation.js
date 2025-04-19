@@ -1,25 +1,29 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+
 import HomeScreen from '../screens/home-screen';
 import DetailsScreen from '../screens/details';
-import LastOrder from '../screens/lastorders';
-const HomeStackNavigation = createStackNavigator();
-const LastOrderStackNavigation = createStackNavigator();
-export function HomeStack() {
-  return (
-    <HomeStackNavigation.Navigator initialRouteName='HomePage' screenOptions={{headerShown:false}}>
-      <HomeStackNavigation.Screen name="HomePage" component={HomeScreen} />
-      <HomeStackNavigation.Screen name="Details" component={DetailsScreen} />
-    </HomeStackNavigation.Navigator>
-  );
-}
+import LastOrderScreen from '../screens/lastorders';
 
-export function LastOrderStack() {
-  return (
-    <LastOrderStackNavigation.Navigator initialRouteName='LastOrderPage' screenOptions={{headerShown:false}}>
-      <LastOrderStackNavigation.Screen name="LastOrderPage" component={LastOrder} />
-      <LastOrderStackNavigation.Screen name="Details" component={DetailsScreen} />  
-    </LastOrderStackNavigation.Navigator>
-  )
-}
+const Stack = createStackNavigator();
 
+// 🔹 Helper function to create stack navigators
+const createStack = (initialRoute, screens) => (
+  <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
+    {screens.map(({ name, component }) => (
+      <Stack.Screen key={name} name={name} component={component} />
+    ))}
+  </Stack.Navigator>
+);
+
+// 🔹 Home Stack
+export const HomeStack = () => createStack('HomeScreen', [
+  { name: 'HomeScreen', component: HomeScreen },
+  { name: 'Details', component: DetailsScreen },
+]);
+
+// 🔹 Last Order Stack
+export const LastOrderStack = () => createStack('LastOrderScreen', [
+  { name: 'LastOrderScreen', component: LastOrderScreen },
+  { name: 'Details', component: DetailsScreen },
+]);

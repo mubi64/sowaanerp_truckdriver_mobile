@@ -1,36 +1,35 @@
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import HomeScreen from '../screens/home-screen';
-import LastOrder from '../screens/lastorders';
-import {View,Text,TouchableOpacity} from 'react-native'
-import { Icon } from '@rneui/themed';
-import { BACKGROUND_COLOR, LOW_PRIOR_FONT_COLOR, PRIMARY_COLOR, PRIOR_FONT_COLOR, SECONDARY_COLOR } from '../assets/colors/colors';
-import {HomeStack,LastOrderStack} from './stacknavigation';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { LOW_PRIOR_FONT_COLOR, PRIMARY_COLOR, PRIOR_FONT_COLOR, SECONDARY_COLOR } from '../assets/colors/colors';
+import { HomeStack, LastOrderStack } from './stacknavigation';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
-import { horizontalScale, moderateScale, verticalScale } from '../helpers/responsive';
+import { moderateScale } from '../helpers/responsive';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import ProfileScreen from '../screens/profile';
+import Icon from 'react-native-vector-icons/Ionicons';
 const Tab = createBottomTabNavigator();
+
+const ICONS = {
+  Home: { name: 'home' },
+  LastOrder: { name: 'cube-outline' },
+  Profile: { name: 'person-outline' },
+};
+
+
 function MyTabBar({ state, descriptors, navigation }) {
- 
+
   const focusedOptions = descriptors[state.routes[state.index].key].options;
-  console.log('state',focusedOptions)
   if (focusedOptions.tabBarVisible === false) {
     return null;
   }
 
   return (
-    <View style={{ flexDirection: 'row',height:verticalScale(60),justifyContent:"space-around",backgroundColor:PRIMARY_COLOR}}>
+    <View style={styles.tabContainer}>
       {state.routes.map((route, index) => {
-        const { options } = descriptors[route.key];
-        
-        const label =
-          options.tabBarLabel !== undefined
-            ? options.tabBarLabel
-            : options.title !== undefined
-            ? options.title
-            : route.name;
-
         const isFocused = state.index === index;
+        const { options } = descriptors[route.key];
+
+        const icon = ICONS[route.name];
+
 
         const onPress = () => {
           const event = navigation.emit({
@@ -54,125 +53,58 @@ function MyTabBar({ state, descriptors, navigation }) {
         return (
           <TouchableOpacity
             accessibilityRole="button"
-            key={index.toString()}
+            key={route.key}
             accessibilityLabel={options.tabBarAccessibilityLabel}
             testID={options.tabBarTestID}
             onPress={onPress}
             onLongPress={onLongPress}
-            style={{alignSelf:"center"}}
+            style={styles.tabButton}
           >
-            {(isFocused)?
-              <View
-              style={{
-                  width: horizontalScale(125), height: verticalScale(120), justifyContent: "center", alignItems: "center", backgroundColor: { PRIMARY_COLOR }// IOS
-                  
-              }}
-          >
-          {(route.name==="Home")?  
-          <Icon name="home" type="font-awesome-5" color={SECONDARY_COLOR} size={moderateScale(20)} />
-                  :
-                  (route.name==="LastOrder")?
-          <Icon name="CodeSandbox" type="antdesign" color={SECONDARY_COLOR} size={moderateScale(20)} />
-                    :
-                    <Icon name="user" type="font-awesome" color={SECONDARY_COLOR} size={moderateScale(20)} />
+            <Icon name={icon.name} color={isFocused ? SECONDARY_COLOR : LOW_PRIOR_FONT_COLOR} size={moderateScale(24)} />
+            <Text>{route.name}</Text>
 
-        }
-<Text style={{ color:PRIOR_FONT_COLOR,fontFamily:"CenturyGothic",fontSize:moderateScale(12) }}>
-    {label}
-  </Text>
-          </View>
-              :
-              <View
-              style={{
-                width: horizontalScale(125), height: verticalScale(120), justifyContent: "center", alignItems: "center", backgroundColor: { PRIMARY_COLOR }// IOS
-                
-            }}
-              >
-                {
-        (route.name==="Home")?
-        <Icon name="home" type="font-awesome-5" color={LOW_PRIOR_FONT_COLOR} size={moderateScale(20)}  />
-                    :
-                    (route.name==="LastOrder")?
-                <Icon name="CodeSandbox" type="antdesign" color={LOW_PRIOR_FONT_COLOR} size={moderateScale(20)} />
-                      :
-                      <Icon name="user" type="font-awesome" color={LOW_PRIOR_FONT_COLOR} size={moderateScale(20)} />
-
-            }
-              </View>
-          
-          }
-             
-            
           </TouchableOpacity>
         );
       })}
     </View>
   );
 }
+
+const getTabBarVisibility = (route) => {
+  const hiddenScreens = ['Details'];
+  const routeName = getFocusedRouteNameFromRoute(route) ?? '';
+  return !hiddenScreens.includes(routeName);
+};
+
 function MyTabs() {
-  const getTabBarVisibility = (route) => {
-    console.log('abaysale',route)
-    const routeName = getFocusedRouteNameFromRoute(route);
-    const hideOnScreens = ["Details"]; // put here name of screen where you want to hide tabBar
-    return !hideOnScreens.includes(routeName);;
-  };
   return (
-    <Tab.Navigator
-      initialRouteName="Home"
- 
-      screenOptions={{headerShown:false}}
+    <Tab.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}
       tabBar={props => <MyTabBar {...props} />}
-//barStyle={{ backgroundColor:BACKGROUND_COLOR,height:verticalScale(80) }}
     >
-      <Tab.Screen
-        name="Home"
-              component={HomeStack}
-          
-        options={({ route }) => ({ 
-          tabBarStyle:  ((route) => {
-            const routeName = getFocusedRouteNameFromRoute(route) ?? ""
-            if (routeName ==='Details' ) {
-              return { display: "none" }
-                  }
-                  return 
-          })(route),
-          tabBarVisible:true,
-          //tabBarLabel: 'Home',
-            
-            tabBarLabel:"Home",
-        
-        })
-          
-        }
-      
-      />
+      <Tab.Screen name="Home" component={HomeStack} />
       <Tab.Screen
         name="LastOrder"
         component={LastOrderStack}
         options={({ route }) => ({
-          tabBarLabel: 'Last Order',
-          tabBarVisible:true,
-
-          tabBarStyle:  ((route) => {
-            const routeName = getFocusedRouteNameFromRoute(route) ?? ""
-            if (routeName ==='Details' ) {
-              return { display: "none" }
-                  }
-                  return 
-          })(route)
+          tabBarStyle: { display: getTabBarVisibility(route) ? 'flex' : 'none' },
         })}
       />
-       <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={({ route }) => ({
-          tabBarLabel: 'Profile',
-          tabBarVisible:true,
-
-        })}
-      />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }
 
-export default MyTabs
+const styles = StyleSheet.create({
+  tabContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 10,
+    paddingBottom: 20,
+    borderTopColor: '#ddd',
+    borderTopWidth: 1,
+    backgroundColor: PRIMARY_COLOR,
+  },
+  tabButton: { alignItems: 'center' },
+});
+
+export default MyTabs;

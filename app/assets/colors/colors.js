@@ -1,4 +1,4 @@
-const BACKGROUND_COLOR = '#f5f5f5';
+const BACKGROUND_COLOR = '#F2F2F2';
 const SECONDARY_COLOR = '#36b368';
 const PRIMARY_COLOR = '#ffffff';
 const PRIOR_FONT_COLOR = '#333333';

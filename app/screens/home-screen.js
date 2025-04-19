@@ -1,453 +1,182 @@
-import React from 'react';
-import {View, Text, FlatList, Image,TouchableOpacity,ActivityIndicator,RefreshControl} from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import {
-  BACKGROUND_COLOR,
-  LOW_PRIOR_FONT_COLOR,
   PRIMARY_COLOR,
-  PRIOR_FONT_COLOR,
-  SECONDARY_COLOR,
 } from '../assets/colors/colors';
 import {
-  horizontalScale,
   verticalScale,
-  moderateScale,
 } from '../helpers/responsive';
-import CalendarStrip from 'react-native-calendar-strip';
+import CalendarStrip from 'react-native-calendar-strip-moment-modification';
 import moment from 'moment';
-import { useAuth } from '../context/auth-context';
 import { Toast } from 'react-native-toast-message/lib/src/Toast';
-import { useFocusEffect,useNavigation} from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { httpGet } from '../network calls/networkCalls';
+import Loading from '../components/Loading';
+import { styles } from '../helpers/styles';
+import Appbar from '../components/appbar';
+import LinearGradient from 'react-native-linear-gradient';
+import { Image } from 'react-native';
 
 const HomeScreen = (props) => {
-  const [dataArray, setDataArray] = React.useState([])
-  const [selectedDate,setSelectedDate] = React.useState(moment())
-  const [refresh,setRefresh] = React.useState(false)
-  const { user, logout, login } = useAuth();
-  const [load, setLoad] = React.useState(true)
+  const [dataArray, setDataArray] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(moment());
+  const [refresh, setRefresh] = useState(false);
+  const [load, setLoad] = useState(true);
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       // Your code here
       getDeliveryTrip();
       return () => {
         // Clean up code here
       };
     }, [])
-  )
-  
- 
+  );
+
+
   const getDeliveryTripByDate = async (date) => {
-     setLoad(true)
-    const getTripsResponse = await httpGet(`/api/resource/Delivery Trip?limit_page_length=5000&fields=["*"]&filters=[["docstatus","=",1],["status","!=","Completed"],["departure_time","between",["${date}","${date}"]]]`)
+    setLoad(true);
+    const getTripsResponse = await httpGet(`/api/method/driver_tracker.api.mobile_api.get_panding_order?date=${date}`);
+    // const getTripsResponse = await httpGet(`/api/resource/Delivery Trip?limit_page_length=5000&fields=["*"]&filters=[["docstatus","=",1],["status","!=","Completed"],["departure_time","between",["${date}","${date}"]]]`);
     if (getTripsResponse.error != undefined) {
       Toast.show({
         type: 'error',
-        position:"top",
-        text1: `${getTripsResponse.error}👋`
+        position: 'top',
+        text1: `${getTripsResponse.error}👋`,
       });
-      setRefresh(false)
-         setLoad(false)
+      setRefresh(false);
+      setLoad(false);
     }
     else {
-      console.log('suuceess',JSON.stringify(getTripsResponse.data,null,2))
-      setDataArray(getTripsResponse.data)
-      setRefresh(false)
-      setLoad(false)
+      // console.log('suuceess', JSON.stringify(getTripsResponse.message, null, 2));
+      setDataArray(getTripsResponse.message);
+      setRefresh(false);
+      setLoad(false);
     }
-  }
+  };
   const getDeliveryTrip = async () => {
- 
-   const getTripsResponse = await httpGet(`/api/resource/Delivery Trip?limit_page_length=5000&fields=["*"]&filters=[["docstatus","=",1],["status","!=","Completed"],["departure_time","between",["${moment().format('DD-MM-YYYY')}","${moment().format('DD-MM-YYYY')}"]]]`)
-   // const getTripsResponse = await httpGet(`/api/resource/Delivery Trip?limit_page_length=5000&fields=["*"]&filters=[["docstatus","=",1],["status","!=","Completed"]]`)
+    setRefresh(true);
+
+    const getTripsResponse = await httpGet(`/api/method/driver_tracker.api.mobile_api.get_panding_order?date=${moment().format('YYYY-MM-DD')}`);
+    // const getTripsResponse = await httpGet(`/api/resource/Delivery Trip?limit_page_length=5000&fields=["*"]&filters=[["docstatus","=",1],["status","!=","Completed"],["departure_time","between",["${moment().format('YYYY-MM-DD')}","${moment().format('YYYY-MM-DD')}"]]]`);
+    // const getTripsResponse = await httpGet(`/api/resource/Delivery Trip?limit_page_length=5000&fields=["*"]&filters=[["docstatus","=",1],["status","!=","Completed"]]`)
 
     if (getTripsResponse.error != undefined) {
       Toast.show({
         type: 'error',
-        position:"top",
-        text1: `${getTripsResponse.error}👋`
+        position: 'top',
+        text1: `${getTripsResponse.error}👋`,
       });
-      setRefresh(false)
-         setLoad(false)
+      setRefresh(false);
+      setLoad(false);
     }
     else {
-      console.log('suuceess',JSON.stringify(getTripsResponse.data,null,2))
-      setDataArray(getTripsResponse.data)
-      setRefresh(false)
-      setLoad(false)
+      console.log('suuceess', JSON.stringify(getTripsResponse.message, null, 2));
+      setDataArray(getTripsResponse.message);
+      setRefresh(false);
+      setLoad(false);
     }
-  }
+  };
   const theDayOfTheMonthOnNextWeek = () => {
     const maxDate = new Date();
-    const max = maxDate.getDate() + 6
-    const setmax = maxDate.setDate(max)
-    return setmax
-  } 
+    const max = maxDate.getDate() + 6;
+    const setmax = maxDate.setDate(max);
+    return setmax;
+  };
   const theDayOfTheMonthOnTodayWeek = () => {
     const minDate = new Date();
-    const min = minDate.getDate()
-    const setmin = minDate.setDate(min)
-    return setmin
-  }
+    const min = minDate.getDate();
+    const setmin = minDate.setDate(min);
+    return setmin;
+  };
 
-    return (
+  return (
     <>
-    <View style={{ flex: 1, backgroundColor: BACKGROUND_COLOR }}>
-      
-      <View
-        style={{
-          width: horizontalScale(375),
-          height: verticalScale(170),
-          backgroundColor: 'white',
-        }}>
-        <View
-          style={{
-            height: verticalScale(40),
-          }}
-        />
-        <View
-          style={{
-            width: horizontalScale(335),
-            height: verticalScale(50),
-            alignSelf: 'center',
-            justifyContent: 'space-between',
-            flexDirection: 'row',
-          }}>
-          <View style={{flexDirection: 'row'}}>
-            <Text
-              style={{
-                fontFamily: 'Outfit-Bold',
-                color: PRIOR_FONT_COLOR,
-                fontSize: moderateScale(35),
-                alignSelf: 'center',
-              }}>
-              List{' '}
-            </Text>
-            <Text
-              style={{
-                fontFamily: 'Outfit-Regular',
-                color: PRIOR_FONT_COLOR,
-                fontSize: moderateScale(35),
-                alignSelf: 'center',
-              }}>
-              of orders
-            </Text>
+      <View style={styles.container}>
+        <Appbar />
+        <View style={styles.headerContainer}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>List <Text style={styles.subtitle}>of orders</Text></Text>
           </View>
-          {/* <Text
-            style={{
-              fontFamily: 'Outfit-Regular',
-              color: SECONDARY_COLOR,
-              fontSize: moderateScale(16),
-              alignSelf: 'center',
-            }}
-          onPress={()=>logout()}
-          >
-          Logout
-          </Text> */}
-        </View>
-        <View
-          style={{
-            height: verticalScale(10),
-          }}
-        />
-
-        <CalendarStrip
-          scrollable
-          iconLeft={null}
-          iconRight={null}
-          style={{height: verticalScale(50), width: horizontalScale(380)}}
-              onDateSelected={(date) => {
-                setSelectedDate(moment(date))
-                //console.log('checking',moment().isSame(date,'date'))
-            getDeliveryTripByDate(moment(date).format('DD-MM-YYYY'))
-              }
-          }
-          minDate={theDayOfTheMonthOnTodayWeek()}
-          maxDate={theDayOfTheMonthOnNextWeek()}
-          calendarColor={PRIMARY_COLOR}
-          //calendarHeaderStyle={{ height: 0 }}
-          useIsoWeekday={false}
-          dateNumberStyle={{
-            color: LOW_PRIOR_FONT_COLOR,
-            fontSize: moderateScale(20),
-            fontFamily: 'Outfit-SemiBold',
-          }}
-          dateNameStyle={{
-            color: PRIOR_FONT_COLOR,
-            fontSize: moderateScale(16),
-            fontFamily: 'Outfit-Regular',
-          }}
-          highlightDateNameStyle={{
-            color: SECONDARY_COLOR,
-            fontSize: moderateScale(16),
-            fontFamily: 'Outfit-Regular',
-          }}
-          highlightDateNumberStyle={{
-            color: SECONDARY_COLOR,
-            fontSize: moderateScale(20),
-            fontFamily: 'Outfit-SemiBold',
-          }}
-        />
-      </View>
-      <View
-        style={{
-          height: verticalScale(30),
-        }}
-      />
-      {/* <View
-        style={{
-          width: horizontalScale(325),
-          alignSelf: 'center',
-          height: verticalScale(50),
-          flexDirection: 'row',
-          backgroundColor: 'white',
-        }}>
-        <Icon
-          name="search1"
-          color={PRIOR_FONT_COLOR}
-          type="antdesign"
-          containerStyle={{
-            alignSelf: 'center',
-            marginLeft: horizontalScale(10),
-          }}
-          size={moderateScale(26)}
-        />
-        <TextInput
-          style={{
-            width: horizontalScale(270),
-            alignSelf: 'center',
-            height: verticalScale(45),
-            fontSize: moderateScale(20),
-            marginLeft: horizontalScale(10),
-            color: PRIOR_FONT_COLOR,
-          }}
-          placeholderTextColor={PRIOR_FONT_COLOR}
-          placeholder="All Loads Near You"
-        />
-      </View> */}
-      {/* <View
-        style={{
-          height: verticalScale(25),
-        }}
-      /> */}
-          {(moment().isSame(selectedDate,'date')) ?
-               <Text
-               style={{
-                 fontFamily: 'Outfit-Medium',
-                 color: PRIOR_FONT_COLOR,
-                 fontSize: moderateScale(35),
-                 marginLeft: horizontalScale(15),
-               }}>
-               Today
-             </Text>
-            :
-            <Text
-            style={{
-              fontFamily: 'Outfit-Medium',
-              color: PRIOR_FONT_COLOR,
-              fontSize: moderateScale(35),
-              marginLeft: horizontalScale(15),
-            }}>
-          {moment(selectedDate).format('DD-MM-YYYY')}
-          </Text>
-          }
-   
-      <View
-        style={{
-          height: verticalScale(15),
-        }}
+          <CalendarStrip
+            scrollable
+            showMonth={false}
+            style={styles.calendar}
+            onDateSelected={(date) => {
+              setSelectedDate(moment(date));
+              getDeliveryTripByDate(moment(date).format('YYYY-MM-DD'));
+            }
+            }
+            minDate={theDayOfTheMonthOnTodayWeek()}
+            maxDate={theDayOfTheMonthOnNextWeek()}
+            calendarColor={PRIMARY_COLOR}
+            useIsoWeekday={false}
+            dateNumberStyle={styles.dateNumberStyle}
+            dateNameStyle={styles.dateNameStyle}
+            highlightDateNameStyle={styles.highlightDateNameStyle}
+            highlightDateNumberStyle={styles.highlightDateNumberStyle}
           />
-          {(load === false && dataArray.length > 0) ?
-               <FlatList
-               data={dataArray}
-               refreshControl={
-                 <RefreshControl
-                     refreshing={refresh}
-                    onRefresh={() => {
-                     setRefresh(true)
-                      getDeliveryTrip();
-                     }} 
-                 />
-             }
-               // onRefresh={() => {
-               //   getDeliveryTrip();
-               // }}
-                     renderItem={({ item ,index}) => {
-                         return (
-                           <TouchableOpacity
-                           style={{
-                             width: horizontalScale(375),
-                             alignSelf: 'center',
-                             height: verticalScale(230),
-                                     backgroundColor: 'white',
-                            marginTop:(index>0)?verticalScale(20):null
-                             }}
-                             onPress={() => {
-                               props.navigation.navigate('Details', {
-                               data:item.name
-                             })
-                           }}
-                           >
-                           <View
-                             style={{
-                               height: verticalScale(15),
-                             }}
-                           />
-                           <View
-                             style={{
-                               width: horizontalScale(315),
-                               alignSelf: 'center',
-                               height: verticalScale(50),
-                             }}>
-                             <View
-                               style={{
-                                 flexDirection: 'row',
-                                 justifyContent: 'space-between',
-                               }}>
-                               <Text
-                                 style={{
-                                   fontFamily: 'Outfit-Medium',
-                                   color: PRIOR_FONT_COLOR,
-                                   fontSize: moderateScale(35),
-                                 }}>
-                                 {}
-                                 </Text>
-                                 <View>
-                                   
-                                 </View>
-                               <Text
-                                 style={{
-                                   fontFamily: 'Outfit-Regular',
-                                   color: LOW_PRIOR_FONT_COLOR,
-                                   fontSize: moderateScale(22),
-                                 }}>
-                                  {item?.total_distance} {item.uom}
-                               </Text>
-                             </View>
-                             <View
-                               style={{
-                                 height: verticalScale(15),
-                               }}
-                                     />
-                                     <View style={{flexDirection:'row'}}>
-                                         <View style={{marginTop:verticalScale(5)}}>
-                                     <View
-                               style={{
-                                 width: horizontalScale(12),
-                                 height: horizontalScale(12),
-                                 borderRadius: horizontalScale(12) / 2,
-                                 backgroundColor: SECONDARY_COLOR,
-                               }}
-                                         />
-                                    
-                                     <View style={{ width: horizontalScale(12) }}>
-                                     <View
-                                style={{width:horizontalScale(0.5),height:verticalScale(60),borderWidth:.7,borderStyle:'dashed',borderColor:SECONDARY_COLOR,alignSelf:'center',marginTop:verticalScale(5)}}
-                                     />
-                                     </View>
-                                     <View
-                               style={{
-                                 width: horizontalScale(12),
-                                 height: horizontalScale(12),
-                                 borderRadius: horizontalScale(12) / 2,
-                                             backgroundColor: SECONDARY_COLOR,
-                                 marginTop:verticalScale(5)
-                               }}
-                                             />
-                                             </View>
-                                         <View style={{ marginLeft: horizontalScale(10)}}>
-                                             <View>
-                                         <Text
-                                 style={{
-                                   fontFamily: 'Outfit-Medium',
-                                   color: PRIOR_FONT_COLOR,
-                                   fontSize: moderateScale(25),
-                                 }}>
-                                 {item?.name}
-                                             </Text>
-                                             <Text
-                                 style={{
-                                   fontFamily: 'Outfit-Regular',
-                                   color:LOW_PRIOR_FONT_COLOR,
-                                   fontSize: moderateScale(20),
-                                 }}>
-                                 Order ID
-                                                 </Text>
-                                   </View>
-                                   <View style={{height:verticalScale(35)}} />
-                                             <View>
-                                         <Text
-                                 style={{
-                                   fontFamily: 'Outfit-Medium',
-                                   color: PRIOR_FONT_COLOR,
-                                   fontSize: moderateScale(25),
-                                 }}>
-                                 { moment(item?.departure_time).format("MMM D HH:mm")}
-                                             </Text>
-                                             <Text
-                                 style={{
-                                   fontFamily: 'Outfit-Regular',
-                                   color:LOW_PRIOR_FONT_COLOR,
-                                   fontSize: moderateScale(20),
-                                 }}>
-                                 Departure Time
-                                                 </Text>
-                                                 </View>
-                                         </View>
-                                   </View>
-                                 </View>
-                                 <Image
-                                     source={require('./../assets/images/truck-load.png')}
-                                     style={{ width: horizontalScale(150), height: verticalScale(100),position:'absolute',right:verticalScale(-20),bottom:verticalScale(10) }}
-                                     
-                                 />
-                         </TouchableOpacity>
-                     )
-                 }}    
-            />
-            : (load === false) ?
-            <Text
-            style={{
-              fontFamily: 'Outfit-Regular',
-              color: PRIOR_FONT_COLOR,
-              fontSize: moderateScale(25),
-              marginLeft: horizontalScale(15),
-            }}>
-           No Trips Found...
-              </Text>
-              :
-              <></>
-          }
-         
-       
-     
-       
-      
-    
-    
+        </View>
+        <View style={{ height: verticalScale(10) }} />
+        <Text style={styles.dateText}>{moment().isSame(selectedDate, 'date') ? 'Today' : moment(selectedDate).format('DD MMM, YYYY')}</Text>
+        {/* <View style={{ height: verticalScale(10) }} /> */}
+        {(load === false && dataArray.length > 0) ?
+          <FlatList
+            data={dataArray}
+            refreshControl={<RefreshControl refreshing={refresh} onRefresh={() => getDeliveryTrip()} />}
+            renderItem={({ item, index }) => {
+              return (
+                <TouchableOpacity
+                  style={styles.itemContainer}
+                  onPress={() => props.navigation.navigate('Details', { data: item.name })}
+                >
+                  <View
+                    style={[styles.rowBetween, styles.itemCenter]}>
+                    <Text style={styles.itemHeading}>
+                      {item?.name}
+                    </Text>
+                    <Text
+                      style={styles.itemDistance}>
+                      {item?.total_distance} {item.uom}
+                    </Text>
+                  </View>
+                  <Text style={styles.itemSubHeading}>Order ID</Text>
+                  <View style={[styles.rowBetween, styles.mt_10]}>
+                    <LinearGradient colors={['#4CB84A', '#50B84C', '#186131']} style={styles.point} />
+                    <View style={[styles.road, styles.mt_20]} >
+                      <Image
+                        source={require('./../assets/images/truck.png')}
+                        style={styles.track_truck}
+                      />
+                    </View>
+                    <LinearGradient colors={['#CC7781', '#CA5B74', '#9F1D20']} style={styles.point} />
+                  </View>
+                  <View style={[styles.rowBetween, styles.mb_3]}>
+                    <View styles={styles.mt_10} >
+                      <Text style={styles.locationText}>
+                        {item.delivery_stops.length > 0 ? item.delivery_stops[0].address : "--"}
+                      </Text>
+                      <Text style={styles.locationDateText}>{item.delivery_stops.length > 0 ? moment(item.delivery_stops[0].estimated_arrival).format('MMM D HH:mm') : "--"}</Text>
+                    </View>
+                    <View styles={styles.mt_10} >
+                      <Text style={[styles.locationText, { textAlign: 'right' }]}>{item.delivery_stops.length > 0 ? item.delivery_stops[item.delivery_stops.length - 1].address : "--"}</Text>
+                      <Text style={[styles.locationDateText, { textAlign: 'right' }]}>{item.delivery_stops.length > 0 ? moment(item.delivery_stops[item.delivery_stops.length - 1].estimated_arrival).format('MMM D HH:mm') : "--"}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            }}
+          />
+          : (load === false) &&
+          <Text style={styles.notFondText}>No Trips Found...</Text>
+        }
       </View>
-      {(load)?
-            <View style={{backgroundColor:'rgba(0,0,0,0.4)',position:'absolute',top:0,bottom:0,left:0,right:0,alignItems:'center',justifyContent:'center'}}>
-          <View style={{ width: horizontalScale(250), height: verticalScale(70),justifyContent:"center",alignItems:'center', borderRadius: 10, backgroundColor: PRIMARY_COLOR, borderColor: SECONDARY_COLOR, borderWidth: 1 }}>
-           <View style={{flexDirection:'row'}}>
-            <ActivityIndicator size={"large"} color={SECONDARY_COLOR} />
-            <Text
-        style={{
-          fontFamily: 'Outfit-Regular',
-          color: PRIOR_FONT_COLOR,
-                  fontSize: moderateScale(25),
-                  marginLeft: horizontalScale(10),
-          alignSelf:'center'
-        }}>
-        Loading...
-              </Text>
-              </View>
-               </View>
-          </View>
-          :
-          null
-      } 
+      {load && (
+        <Loading />
+      )}
     </>
   );
 };
 
+
 export default HomeScreen;
+

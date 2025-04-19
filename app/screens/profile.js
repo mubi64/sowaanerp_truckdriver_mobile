@@ -1,36 +1,38 @@
 import React from 'react';
-import {View, Text} from 'react-native';
+import { View, Text, Platform } from 'react-native';
+import { Avatar } from '@rneui/base';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useAuth } from '../context/auth-context';
+import { styles } from '../helpers/styles';
 import {
   horizontalScale,
   moderateScale,
   verticalScale,
 } from '../helpers/responsive';
-import {Avatar} from '@rneui/base';
 import {
-  SECONDARY_COLOR,
-  BACKGROUND_COLOR,
   PRIOR_FONT_COLOR,
   PRIMARY_COLOR,
   LOW_PRIOR_FONT_COLOR,
 } from '../assets/colors/colors';
-import {TouchableOpacity} from 'react-native-gesture-handler';
-import {useAuth} from '../context/auth-context';
 
 const ProfileScreen = () => {
-  const {user, logout, login} = useAuth();
+  const { employee, logout } = useAuth();
+
   return (
     <>
-      <View style={{flex: 1, backgroundColor: BACKGROUND_COLOR}}>
+      <View style={styles.container}>
+        {/* Profile Header */}
         <Text
           style={{
             fontSize: moderateScale(30),
             fontFamily: 'Outfit-Medium',
             color: PRIOR_FONT_COLOR,
-            marginTop: verticalScale(20),
-            marginLeft: horizontalScale(10),
+            marginLeft: horizontalScale(24),
           }}>
           Profile
         </Text>
+
+        {/* Profile Card */}
         <View
           style={{
             backgroundColor: PRIMARY_COLOR,
@@ -38,10 +40,13 @@ const ProfileScreen = () => {
             height: verticalScale(200),
             alignSelf: 'center',
             marginTop: verticalScale(20),
+            borderRadius: moderateScale(16),
+            justifyContent: 'center',
+            alignItems: 'center',
             ...Platform.select({
               ios: {
                 shadowColor: '#AFAFAF',
-                shadowOffset: {width: 0, height: 2},
+                shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.2,
                 shadowRadius: 4,
               },
@@ -49,52 +54,52 @@ const ProfileScreen = () => {
                 elevation: 4,
               },
             }),
-            borderRadius: moderateScale(16),
-            justifyContent: 'center',
-            alignItems: 'center',
           }}>
           <Avatar
-            source={{
-              uri: 'https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg?w=2000',
-            }}
-            size={moderateScale(80)}
+            source={require('./../assets/images/driver_dp.png')}
+            size={moderateScale(100)}
             rounded
           />
           <Text
             style={{
-              fontSize: moderateScale(30),
+              fontSize: moderateScale(26),
               fontFamily: 'Outfit-Regular',
               color: PRIOR_FONT_COLOR,
-              marginTop: verticalScale(20),
+              marginTop: verticalScale(16),
             }}>
-            Driver Name
+            {employee?.first_name || 'Driver Name'}
           </Text>
           <Text
             style={{
-              fontSize: moderateScale(20),
+              fontSize: moderateScale(18),
               fontFamily: 'Outfit-Regular',
               color: LOW_PRIOR_FONT_COLOR,
-              marginTop: verticalScale(5),
+              marginTop: verticalScale(4),
             }}>
-            Driver
+            {employee?.designation || 'Designation'}
           </Text>
         </View>
+        <View style={{margin: 20}} >
+          <Text style={{padding: 6, fontSize: 16, fontWeight: 'bold'}}>Name: {employee?.employee_name}</Text>
+          <Text style={{padding: 6, fontSize: 16, fontWeight: 'bold'}}>DOB: {employee?.date_of_birth}</Text>
+        </View>
+
+        {/* Logout Button */}
+
       </View>
-      <View
-        style={{
-          width: horizontalScale(110),
-          height: verticalScale(50),
-          borderRadius: moderateScale(25),
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'red',
-          position: 'absolute',
-          right: horizontalScale(20),
-          bottom: verticalScale(20),
-        }}>
-        <TouchableOpacity
-          onPress={() => {
-            logout();
+      <TouchableOpacity onPress={logout} style={{
+        position: 'absolute',
+        right: horizontalScale(20),
+        bottom: verticalScale(20),
+      }}>
+        <View
+          style={{
+            width: horizontalScale(110),
+            height: verticalScale(50),
+            borderRadius: moderateScale(25),
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'red',
           }}>
           <Text
             style={{
@@ -104,8 +109,8 @@ const ProfileScreen = () => {
             }}>
             Log out
           </Text>
-        </TouchableOpacity>
-      </View>
+        </View>
+      </TouchableOpacity>
     </>
   );
 };

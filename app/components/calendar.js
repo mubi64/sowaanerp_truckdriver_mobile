@@ -13,8 +13,8 @@ const getDayName = (year, month, day) => {
 const HorizontalDateCalendar = ({ selectedDate, onSelectDate, year, month }) => {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  const renderDayName = (dayName) => (
-    <View style={styles.dayNameContainer} key={dayName}>
+  const renderDayName = (dayName, index) => (
+    <View style={styles.dayNameContainer} key={index}>
       <Text style={styles.dayName}>{dayName}</Text>
     </View>
   );
