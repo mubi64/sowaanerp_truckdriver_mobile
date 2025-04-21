@@ -16,37 +16,39 @@ import { GetItem } from '../async-storage/async-storage';
 const SplashScreen = () => {
   const { user, login } = useAuth();
   const [load, setLoad] = useState(true);
+  const [checkedLogin, setCheckedLogin] = useState(false); // ✅ To avoid re-triggering
 
   useEffect(() => {
     const checkUserLogin = async () => {
-      const isUserLoggedIn = await GetItem('userLoggedIn');
-      if (isUserLoggedIn !== null) {
-        login(true);
+      if (!checkedLogin) {
+        const isUserLoggedIn = await GetItem('userLoggedIn');
+        if (isUserLoggedIn !== null) {
+          login(true); // ✅ Login only once
+        }
+        setCheckedLogin(true); // ✅ Flag to prevent loop
+        setTimeout(() => setLoad(false), 1500); // Faster splash delay
       }
-      setTimeout(() => setLoad(false), 3000); // Reduced time to 3s for faster UX
     };
 
     checkUserLogin();
-  }, [login]);
+  }, [checkedLogin]); // Only re-run if login hasn't been checked
 
   if (load) {
-    // We haven't finished checking for the token yet
-    return (<View style={styles.container}>
-      <View
-        style={styles.logoContainer}
-      >
-        <Image
-          source={require('./../assets/images/truck-load.png')}
-          style={styles.logoImageSize}
-        />
+    return (
+      <View style={styles.container}>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require('./../assets/images/truck-load.png')}
+            style={styles.logoImageSize}
+          />
+        </View>
+        <View style={{ flexDirection: 'row', marginTop: horizontalScale(2), alignSelf: 'center' }}>
+          <Text style={styles.title}>SowaanERP</Text>
+          <Text style={styles.title}> Driver App</Text>
+        </View>
+        <View style={{ height: verticalScale(24.36) }} />
       </View>
-      <View
-        style={{ flexDirection: 'row', marginTop: horizontalScale(2), alignSelf: 'center' }}>
-        <Text style={styles.title}>SowaanERP</Text>
-        <Text style={styles.title}> Driver App</Text>
-      </View>
-      <View style={{ height: verticalScale(24.36) }} />
-    </View>);
+    );
   }
 
   return user ? <MyTabs /> : <LoginScreen />;

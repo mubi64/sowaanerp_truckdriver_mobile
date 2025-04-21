@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '../screens/home-screen';
 import DetailsScreen from '../screens/details';
 import LastOrderScreen from '../screens/lastorders';
+import Items from '../screens/Items';
 
 const Stack = createStackNavigator();
 
@@ -13,6 +14,7 @@ const createStack = (initialRoute, screens) => (
     {screens.map(({ name, component }) => (
       <Stack.Screen key={name} name={name} component={component} />
     ))}
+    <Stack.Screen name='Items' component={Items} />
   </Stack.Navigator>
 );
 

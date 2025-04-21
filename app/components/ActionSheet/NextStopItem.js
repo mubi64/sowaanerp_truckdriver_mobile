@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Icon } from '@rneui/base';
 import moment from 'moment';
 import {
@@ -14,6 +14,7 @@ import {
 } from '../../assets/colors/colors';
 
 const NextStopItem = ({ nextStop, check, onToggleCheck }) => {
+  // navigation.navigate('Details', { data: item.name })
   return (
     <View
       style={{

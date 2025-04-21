@@ -62,7 +62,7 @@ const LoginScreen = props => {
         usr: eemail,
         pwd: password,
       });
-      console.log(res, "REsponce data checking");
+      // console.log(res, "REsponce data checking");
       if (res.error !== undefined) {
         Toast.show({
           type: 'error',

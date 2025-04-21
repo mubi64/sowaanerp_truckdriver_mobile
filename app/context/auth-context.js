@@ -7,10 +7,10 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // You can store user information here
   const [employee, setEmployee] = useState("");
 
-  const login = (userData) => {
+  const login = async (userData) => {
     // Logic for user login
     setUser(userData);
-    getEmployee();
+    await getEmployee();
     StoreItem('userLoggedIn', 'true');
   };
 
@@ -21,8 +21,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   const getEmployee = async () => {
-    const employeeRes = await httpGet('/api/method/driver_tracker.api.mobile_api.get_employee_info');
-    setEmployee(employeeRes.message);
+    try {
+      const employeeRes = await httpGet('/api/method/driver_tracker.api.mobile_api.get_employee_info');
+      setEmployee(employeeRes.message);
+    } catch (error) {
+      console.log('Failed to fetch employee:', error);
+      setEmployee(null);
+    }
   }
 
   return (

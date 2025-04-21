@@ -1,4 +1,6 @@
 import { GetItem } from '../async-storage/async-storage';
+import { Platform } from 'react-native';
+import axios from 'axios';
 
 const getBaseUrl = async () => await GetItem('BASEURL');
 
@@ -23,7 +25,7 @@ export const httpGet = async (url) => {
       credentials: 'include',
     });
 
-    console.log('API response GET:', response);
+    console.log('API response GET:', url, response);
     return await handleResponse(response);
   } catch (error) {
     console.error('GET Error on Network line 29:', error);
@@ -66,6 +68,35 @@ export const httpPUT = async (url, data) => {
     return { error };
   }
 };
+
+
+export const uploadToERP = async (uri) => {
+  const fileName = uri.split('/').pop();
+  const fileType = fileName.split('.').pop();
+  const BaseUrl = await getBaseUrl();
+  const formData = new FormData();
+  formData.append('file', {
+    uri: Platform.OS === 'android' ? uri : uri.replace('file://', ''),
+    name: fileName,
+    type: `image/${fileType}`,
+  });
+  formData.append('is_private', 0);
+
+  const config = {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  };
+
+  try {
+    const res = await axios.post(`${BaseUrl}/api/method/upload_file`, formData, config);
+    return res.data.message.file_url; // The file URL
+  } catch (err) {
+    console.error('Upload failed:', err.response?.data || err);
+    throw new Error('Image upload failed');
+  }
+};
+
 
 const get_set_cookies = (headers) => {
   const cookies = [];

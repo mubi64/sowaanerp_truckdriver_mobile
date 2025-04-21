@@ -28,7 +28,7 @@ const LastOrder = (props) => {
   const [dataArray, setDataArray] = useState([])
   const [refresh, setRefresh] = useState(false)
 
-  const { user, logout, login } = useAuth();
+  const { user, logout } = useAuth();
   const [load, setLoad] = useState(true)
   React.useEffect(() => {
     getDeliveryTrip();
