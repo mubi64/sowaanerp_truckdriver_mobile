@@ -10,7 +10,7 @@ import moment from 'moment';
 import { useFocusEffect } from '@react-navigation/native';
 import GetLocation from 'react-native-get-location';
 import Toast from 'react-native-toast-message';
-import { PanGestureHandler } from 'react-native-gesture-handler';
+import { FlatList, PanGestureHandler } from 'react-native-gesture-handler';
 
 import PrimaryGradientButton from '../components/PrimaryGradientButton';
 import {
@@ -34,16 +34,12 @@ import BackButton from '../components/BackButton';
 
 const DetailsScreen = ({ route, navigation }) => {
   const scrollViewRef = useRef(null);
-  const [lat, setLat] = useState(24.8601);
-  const [long, setLong] = useState(67.0565);
   const [visited, setVisited] = useState([]);
   const [animationBottom] = useState(new Animated.Value(0));
-  const [longDelta, setLongDelta] = useState(0.03);
-  const [check, setCheck] = useState(false);
+  const [checkedIndex, setCheckedIndex] = useState(null);
   const [singleDeliveryTrip, setSingleDeliveryTrip] = useState({});
-  const [latDelta, setLatDelta] = useState(0.03 * (horizontalScale(1) / verticalScale(1)));
   const [load, setLoad] = useState(true);
-  const [nextStop, setNextStop] = useState({});
+  const [nextStop, setNextStop] = useState([]);
 
   const bringUpActionSheet = () => {
     Animated.timing(animationBottom, {
@@ -69,15 +65,6 @@ const DetailsScreen = ({ route, navigation }) => {
 
   const getTextWithoutHTMLTags = (text) => text.replace(/(<([^>]+)>)/gi, ' ');
 
-  const getCurrentLocation = () => {
-    GetLocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 60000 })
-      .then(location => {
-        setLat(location.latitude);
-        setLong(location.longitude);
-      })
-      .catch(error => console.warn(error.code, error.message));
-  };
-
   useFocusEffect(
     useCallback(() => {
       const getSingleDetail = async () => {
@@ -92,28 +79,29 @@ const DetailsScreen = ({ route, navigation }) => {
           const visitedStops = trip.delivery_stops.filter(stop => stop.visited === 1);
           const unvisitedStops = trip.delivery_stops.filter(stop => stop.visited === 0);
           if (visitedStops.length > 0) setVisited(visitedStops);
-          if (unvisitedStops.length > 0) setNextStop(unvisitedStops[0]);
+          if (unvisitedStops.length > 0) setNextStop(unvisitedStops);
 
           setLoad(false);
         }
       };
-      getCurrentLocation();
       getSingleDetail();
-    }, [])
+    }, [route.params.data])
   );
 
   const onComplete = async () => {
-    if (!check) {
-      Toast.show({ type: 'error', position: 'top', text1: 'Check last location 👋' });
+    if (checkedIndex === null) {
+      Toast.show({ type: 'error', position: 'top', text1: 'Please check one stop 👋' });
       return;
     }
     setLoad(true);
+    const selectedStop = nextStop[checkedIndex];
     const updatedStops = singleDeliveryTrip.delivery_stops.map(item =>
-      item.name === nextStop?.name ? { ...item, visited: 1 } : item
+      item.name === selectedStop?.name ? { ...item, visited: 1 } : item
     );
-    if (nextStop?.delivery_note) {
+
+    if (selectedStop?.delivery_note) {
       navigation.navigate('Items', {
-        note: nextStop?.delivery_note,
+        note: selectedStop?.delivery_note,
         trip: route.params.data,
         stop: updatedStops,
       });
@@ -123,24 +111,30 @@ const DetailsScreen = ({ route, navigation }) => {
         text1: 'No Delivery Note Found',
         position: 'top',
       });
+      const response = await httpPUT(`/api/resource/Delivery Trip/${route.params.data}`, { delivery_stops: updatedStops });
+      setLoad(false);
+      if (response.error) {
+        setLoad(false);
+        Toast.show({ type: 'error', position: 'top', text1: `${response.error}👋` });
+      } else {
+        const visitedStops = response.data.delivery_stops.filter(stop => stop.visited === 1);
+        const unvisitedStops = response.data.delivery_stops.filter(stop => stop.visited === 0);
+        setVisited(visitedStops);
+        setNextStop(unvisitedStops);
+        setCheckedIndex(null);
+        setLoad(false);
+      }
     }
-    // const response = await httpPUT(`/api/resource/Delivery Trip/${route.params.data}`, { delivery_stops: updatedStops });
-    // if (response.error) {
-    //   setLoad(false);
-    //   Toast.show({ type: 'error', position: 'top', text1: `${response.error}👋` });
-    // } else {
-    //   const visitedStops = response.Data.delivery_stops.filter(stop => stop.visited === 1);
-    //   const unvisitedStops = response.Data.delivery_stops.filter(stop => stop.visited === 0);
-    //   setVisited(visitedStops);
-    //   setNextStop(unvisitedStops.length > 0 ? unvisitedStops[0] : {});
-    //   setCheck(false);
-    //   setLoad(false);
-    // }
+  };
+
+  const handleToggleCheck = (index) => {
+    // Toggle selection: deselect if already selected, else select
+    setCheckedIndex(prev => (prev === index ? null : index));
   };
 
   return (
     <>
-      <MapDisplay lat={lat} long={long} latDelta={latDelta} longDelta={longDelta} nextStop={nextStop} getTextWithoutHTMLTags={getTextWithoutHTMLTags} />
+      <MapDisplay nextStop={nextStop.length > 0 ? nextStop[0] : {}} getTextWithoutHTMLTags={getTextWithoutHTMLTags} />
       <BackButton onPress={() => navigation.goBack()} />
 
       <PanGestureHandler
@@ -153,13 +147,13 @@ const DetailsScreen = ({ route, navigation }) => {
             <View style={{ width: horizontalScale(310), height: verticalScale(100), alignSelf: 'center', flexDirection: 'row', justifyContent: 'space-between' }}>
               <View>
                 <Text style={{ fontFamily: 'Outfit-Medium', fontSize: moderateScale(20), color: PRIOR_FONT_COLOR, fontWeight: '700', marginTop: verticalScale(2) }}>
-                  {Object.keys(nextStop).length > 0 ? moment(nextStop?.estimated_arrival).format('MMM D HH:mm') : null}
+                  {nextStop.length > 0 ? moment(nextStop[0]?.estimated_arrival).format('MMM D HH:mm') : null}
                 </Text>
                 <Text style={{ fontFamily: 'Outfit-Medium', fontSize: moderateScale(20), color: PRIOR_FONT_COLOR, fontWeight: '700', letterSpacing: horizontalScale(1), marginTop: verticalScale(2) }}>
-                  {Object.keys(nextStop).length > 0 ? `${nextStop?.distance}${nextStop?.uom === 'Meter' ? ' m' : ''} on way` : 'WELL DONE!'}
+                  {nextStop.length > 0 ? `${nextStop[0]?.distance}${nextStop[0]?.uom === 'Meter' ? ' m' : ''} on way` : 'WELL DONE!'}
                 </Text>
                 <Text style={{ fontFamily: 'Outfit-Medium', fontSize: moderateScale(16), color: LOW_PRIOR_FONT_COLOR, fontWeight: '700', marginTop: verticalScale(2) }}>
-                  {Object.keys(nextStop).length > 0 ? 'Next stop estimated time with distance' : 'Job Completed'}
+                  {nextStop.length > 0 ? 'Next stop estimated time with distance' : 'Job Completed'}
                 </Text>
               </View>
             </View>
@@ -179,11 +173,11 @@ const DetailsScreen = ({ route, navigation }) => {
                   <View>
                     {visited.map((_, index) => (
                       <View key={`dot-${index}`} style={{ marginTop: verticalScale(5) }}>
+                        <View style={{ width: horizontalScale(12), height: horizontalScale(12), borderRadius: horizontalScale(12) / 2, borderColor: LOW_PRIOR_FONT_COLOR, borderWidth: 2 }} />
 
-                        <View style={{ width: horizontalScale(12), height: horizontalScale(12), borderRadius: horizontalScale(12) / 2, borderColor: SECONDARY_COLOR, borderWidth: 2 }} />
-                        <View style={{ width: horizontalScale(12) }}>
-                          <View style={{ width: horizontalScale(0.5), height: verticalScale(60), borderWidth: 0.5, borderStyle: 'dashed', borderColor: SECONDARY_COLOR, alignSelf: 'center', marginTop: verticalScale(5) }} />
-                        </View>
+                        {!(visited.length - 1 === index) && <View style={{ width: horizontalScale(12) }}>
+                          <View style={{ width: horizontalScale(0.5), height: verticalScale(40), borderWidth: 0.5, borderStyle: 'dashed', borderColor: LOW_PRIOR_FONT_COLOR, alignSelf: 'center', marginTop: verticalScale(5) }} />
+                        </View>}
                       </View>
                     ))}
                   </View>
@@ -191,12 +185,18 @@ const DetailsScreen = ({ route, navigation }) => {
                     {visited.map((item, index) => <VisitedStopItem key={`visited-${index}`} item={item} />)}
                   </View>
                 </View>
-                {Object.keys(nextStop).length > 0 && <NextStopItem nextStop={nextStop} check={check} onToggleCheck={() => setCheck(!check)} />}
+                {nextStop.length > 0 &&
+                  // for loop to display next stop items
+                  nextStop.map((item, index) => (
+                    <NextStopItem key={`next-stop-${index}`} nextStop={item} check={checkedIndex === index}
+                      onToggleCheck={() => handleToggleCheck(index)} stopLength={nextStop.length - 1 === index} />
+                  ))
+                }
               </View>
             </View>
           </ScrollView>
 
-          {Object.keys(nextStop).length > 0 && (
+          {checkedIndex !== null && (
             <View style={{ position: 'absolute', bottom: verticalScale(10), marginHorizontal: 30 }}>
               <PrimaryGradientButton onPress={onComplete} text="Next" />
             </View>

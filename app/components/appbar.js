@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View, PermissionsAndroid, Platform } from 'react-native';
 import GetLocation from 'react-native-get-location';
-import Geocoder from 'react-native-geocoding';
 import { styles } from '../helpers/styles';
 import { Avatar } from '@rneui/base';
 import { moderateScale } from '../helpers/responsive';
@@ -9,8 +8,6 @@ import { Icon } from '@rneui/themed';
 import { SECONDARY_COLOR } from '../assets/colors/colors';
 import { useAuth } from '../context/auth-context';
 
-// Initialize Geocoder once
-Geocoder.init('AIzaSyBwIQQCT80qJDnmN-bh0KLL9Ln_mQS7RVA'); // <--- Replace with your real API key
 
 const Appbar = () => {
     const { employee } = useAuth();
@@ -20,6 +17,7 @@ const Appbar = () => {
     useEffect(() => {
         const requestLocation = async () => {
             try {
+                // Request permission on Android
                 if (Platform.OS === 'android') {
                     const granted = await PermissionsAndroid.request(
                         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
@@ -30,38 +28,41 @@ const Appbar = () => {
                     }
                 }
 
+                // Get current location
                 const loc = await GetLocation.getCurrentPosition({
                     enableHighAccuracy: true,
-                    timeout: 15000,
+                    timeout: 60000,
                 });
 
                 const { latitude, longitude } = loc;
 
-                const geoResult = await Geocoder.from(latitude, longitude);
-                console.log('Geocoder result:', geoResult);
+                // Call OpenStreetMap's Nominatim reverse geocoding
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+                    {
+                        headers: {
+                            'User-Agent': 'transport_driver_app/1.0 (m.saad@sowaan.com)',
+                            'Accept-Language': 'en',
+                        },
+                    }
+                );
+                const data = await response.json();
 
-                if (geoResult.results.length > 0) {
-                    const address = geoResult.results[0].address_components;
-                    const cityComponent = address.find(c =>
-                        c.types.includes('locality') || c.types.includes('administrative_area_level_1')
-                    );
-                    const countryComponent = address.find(c => c.types.includes('country'));
+                if (data && data.address) {
+                    const address = data.address;
 
-                    const cityName = cityComponent?.long_name || '';
-                    const country = countryComponent?.long_name || '';
+                    const cityName = address.town || address.city_district || '';
+                    const countryName = address.country || '';
 
-                    setCity(`${cityName}, ${country}`);
+                    setCity(`${cityName}, ${countryName}`);
                 } else {
                     setErrorMsg('No address found for location');
                 }
+
             } catch (error) {
                 console.log('Reverse Geocode Error:', error);
-                if (error.origin) {
-                    console.log('Google API Error:', error.origin); // This shows the actual Google error
-                }
                 setErrorMsg('Error fetching location');
             }
-
         };
 
         requestLocation();

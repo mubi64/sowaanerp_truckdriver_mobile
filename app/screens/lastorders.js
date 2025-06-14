@@ -28,7 +28,6 @@ const LastOrder = (props) => {
   const [dataArray, setDataArray] = useState([])
   const [refresh, setRefresh] = useState(false)
 
-  const { user, logout } = useAuth();
   const [load, setLoad] = useState(true)
   React.useEffect(() => {
     getDeliveryTrip();
@@ -126,51 +125,51 @@ const LastOrder = (props) => {
             renderItem={({ item, index }) => {
               return (
                 <TouchableOpacity
-                key={index}
+                  key={index}
                   style={styles.itemContainer}
                   onPress={() => props.navigation.navigate('Details', { data: item.name })}
                 >
-                    <View
-                      style={[styles.rowBetween, styles.mb_3]}>
-                      <View style={styles.mb_3}>
-                        <Text style={styles.itemHeading}>
-                          {item?.name}
-                        </Text>
-                        <Text style={styles.itemSubHeading}>
-                          Order ID
-                        </Text>
-                      </View>
-                      <Text
-                        style={styles.itemDistance}>
-                        {item?.total_distance} {item.uom}
+                  <View
+                    style={[styles.rowBetween, styles.mb_3]}>
+                    <View style={styles.mb_3}>
+                      <Text style={styles.itemHeading}>
+                        {item?.name}
+                      </Text>
+                      <Text style={styles.itemSubHeading}>
+                        Order ID
                       </Text>
                     </View>
-                    <View style={styles.mb_3} >
-                      <View style={[styles.row, styles.itemCenter, styles.mb_3]} >
-                        <View style={styles.locationIcon}>
-                          <Icon
-                            name="location"
-                            color={SECONDARY_COLOR}
-                            size={moderateScale(16)}
-                          />
-                        </View>
-                        <Text style={styles.locationText}>{item.delivery_stops.length > 0 ? item.delivery_stops[item.delivery_stops.length - 1].address : "--"}</Text>
+                    <Text
+                      style={styles.itemDistance}>
+                      {item?.total_distance} {item.uom}
+                    </Text>
+                  </View>
+                  <View style={styles.mb_3} >
+                    <View style={[styles.row, styles.itemCenter, styles.mb_3]} >
+                      <View style={styles.locationIcon}>
+                        <Icon
+                          name="location"
+                          color={SECONDARY_COLOR}
+                          size={moderateScale(16)}
+                        />
                       </View>
-                      <View style={[styles.row, styles.itemCenter, styles.mb_3]} >
-                        <View style={styles.locationIcon}>
-                          <Icon
-                            name="calendar"
-                            color={SECONDARY_COLOR}
-                            type="feather"
-                            size={moderateScale(16)}
-                          />
-                        </View>
-                        <Text style={styles.locationText}>{item.departure_time}</Text>
-                      </View>
+                      <Text style={styles.locationText}>{item.delivery_stops.length > 0 ? item.delivery_stops[item.delivery_stops.length - 1].custom_address_name : "--"}</Text>
                     </View>
+                    <View style={[styles.row, styles.itemCenter, styles.mb_3]} >
+                      <View style={styles.locationIcon}>
+                        <Icon
+                          name="calendar"
+                          color={SECONDARY_COLOR}
+                          type="feather"
+                          size={moderateScale(16)}
+                        />
+                      </View>
+                      <Text style={styles.locationText}>{item.departure_time}</Text>
+                    </View>
+                  </View>
                   <LinearGradient colors={['#4CAF50', '#1B5E20']} start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }} style={styles.status} >
-                    <Text style={{ color: 'white',  fontWeight: '600' }} >{item?.status}</Text>
+                    <Text style={{ color: 'white', fontWeight: '600' }} >{item?.status}</Text>
                   </LinearGradient>
                 </TouchableOpacity>
               )

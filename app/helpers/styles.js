@@ -82,7 +82,7 @@ export const styles = StyleSheet.create({
         width: horizontalScale(30),
         backgroundColor: 'white',
     },
-    container: { flex: 1, backgroundColor: BACKGROUND_COLOR, paddingTop: 40},
+    container: { flex: 1, backgroundColor: BACKGROUND_COLOR, paddingTop: 40 },
     headerContainer: {
         paddingHorizontal: 20,
         paddingVertical: 10,
@@ -193,6 +193,8 @@ export const styles = StyleSheet.create({
         shadowColor: '#000',
         shadowOpacity: 0.1,
         shadowRadius: 5, elevation: 2,
+        overflow: 'hidden',
+        flexWrap: 'wrap'
     },
     itemWidth: {
         width: horizontalScale(315),
@@ -235,7 +237,7 @@ export const styles = StyleSheet.create({
     },
     locationText: {
         color: PRIOR_FONT_COLOR,
-        fontWeight: 'bold',
+        minWidth: 0,
     },
     locationDateText: {
         color: LOW_PRIOR_FONT_COLOR,
