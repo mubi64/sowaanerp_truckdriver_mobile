@@ -119,7 +119,7 @@ const HomeScreen = (props) => {
         <View style={{ height: verticalScale(10) }} />
         <Text style={styles.dateText}>{moment().isSame(selectedDate, 'date') ? 'Today' : moment(selectedDate).format('DD MMM, YYYY')}</Text>
         {/* <View style={{ height: verticalScale(10) }} /> */}
-        {(load === false && dataArray.length > 0) ?
+        {(load === false) ?
           <FlatList
             data={dataArray}
             refreshControl={<RefreshControl refreshing={refresh} onRefresh={() => getDeliveryTrip()} />}
@@ -151,28 +151,25 @@ const HomeScreen = (props) => {
                     <LinearGradient colors={['#CC7781', '#CA5B74', '#9F1D20']} style={styles.point} />
                   </View>
                   <View style={[styles.rowBetween, styles.mb_3]}>
-                    <View styles={styles.mt_10} >
-                      <Text style={styles.locationText}>
-                        {item.delivery_stops.length > 0 ? item.delivery_stops[0].address : "--"}
+                    <View styles={[styles.mt_10, { flex: 1 }]} >
+                      <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">
+                        {item.delivery_stops.length > 0 ? item.delivery_stops[0].custom_address_name : "--"}
                       </Text>
                       <Text style={styles.locationDateText}>{item.delivery_stops.length > 0 ? moment(item.delivery_stops[0].estimated_arrival).format('MMM D HH:mm') : "--"}</Text>
                     </View>
-                    <View styles={styles.mt_10} >
-                      <Text style={[styles.locationText, { textAlign: 'right' }]}>{item.delivery_stops.length > 0 ? item.delivery_stops[item.delivery_stops.length - 1].address : "--"}</Text>
+                    <View styles={[styles.mt_10, { flex: 1 }]} >
+                      <Text style={[styles.locationText, { textAlign: 'right' }]} numberOfLines={1} ellipsizeMode="tail">{item.delivery_stops.length > 0 ? item.delivery_stops[item.delivery_stops.length - 1].custom_address_name : "--"}</Text>
                       <Text style={[styles.locationDateText, { textAlign: 'right' }]}>{item.delivery_stops.length > 0 ? moment(item.delivery_stops[item.delivery_stops.length - 1].estimated_arrival).format('MMM D HH:mm') : "--"}</Text>
                     </View>
                   </View>
                 </TouchableOpacity>
               );
             }}
+            ListEmptyComponent={<Text style={styles.notFondText}>No Trips Found...</Text>}
           />
-          : (load === false) &&
-          <Text style={styles.notFondText}>No Trips Found...</Text>
+          : <Loading />
         }
       </View>
-      {load && (
-        <Loading />
-      )}
     </>
   );
 };

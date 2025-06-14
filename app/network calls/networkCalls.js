@@ -1,6 +1,8 @@
 import { GetItem } from '../async-storage/async-storage';
 import { Platform } from 'react-native';
 import axios from 'axios';
+import ImageResizer from '@bam.tech/react-native-image-resizer';
+
 
 const getBaseUrl = async () => await GetItem('BASEURL');
 
@@ -71,12 +73,21 @@ export const httpPUT = async (url, data) => {
 
 
 export const uploadToERP = async (uri) => {
-  const fileName = uri.split('/').pop();
+  const resizedImage = await ImageResizer.createResizedImage(
+    uri,
+    800, // width
+    800, // height
+    'JPEG', // format
+    70 // quality (0-100)
+  );
+
+  const fileName = resizedImage.name || resizedImage.uri.split('/').pop();
   const fileType = fileName.split('.').pop();
   const BaseUrl = await getBaseUrl();
   const formData = new FormData();
+
   formData.append('file', {
-    uri: Platform.OS === 'android' ? uri : uri.replace('file://', ''),
+    uri: Platform.OS === 'android' ? resizedImage.uri : resizedImage.uri.replace('file://', ''),
     name: fileName,
     type: `image/${fileType}`,
   });
@@ -90,7 +101,7 @@ export const uploadToERP = async (uri) => {
 
   try {
     const res = await axios.post(`${BaseUrl}/api/method/upload_file`, formData, config);
-    return res.data.message.file_url; // The file URL
+    return res.data.message.file_url;
   } catch (err) {
     console.error('Upload failed:', err.response?.data || err);
     throw new Error('Image upload failed');

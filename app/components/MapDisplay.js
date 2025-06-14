@@ -1,32 +1,54 @@
-import React from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import MapView, { Callout, Marker, Polyline } from 'react-native-maps';
+import { PRIOR_FONT_COLOR, SECONDARY_COLOR } from '../assets/colors/colors';
+import GetLocation from 'react-native-get-location';
 import { View, Text } from 'react-native';
-import MapView, { Marker, Callout } from 'react-native-maps';
-import MapViewDirections from 'react-native-maps-directions';
-import {
-  horizontalScale,
-  verticalScale,
-  moderateScale,
-} from '../helpers/responsive';
-import {
-  SECONDARY_COLOR,
-  PRIOR_FONT_COLOR,
-} from '../assets/colors/colors';
+import { horizontalScale, moderateScale, verticalScale } from '../helpers/responsive';
 
-const MapDisplay = ({ lat, long, latDelta, longDelta, nextStop, getTextWithoutHTMLTags }) => {
+const MapDisplay = ({ nextStop, getTextWithoutHTMLTags }) => {
+  const [lat, setLat] = useState(24.7138956);
+  const [long, setLong] = useState(46.5897598);
+
+  const getCurrentLocation = () => {
+    GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 60000,
+    })
+      .then(location => {
+        setLat(location.latitude);
+        setLong(location.longitude);
+      })
+      .catch(error => console.warn(error.code, error.message));
+  };
+
+  useEffect(() => {
+    getCurrentLocation();
+  }, []);
+
+  const currentLocation = { latitude: lat, longitude: long };
+  const nextLocation =
+    nextStop && nextStop.lat && nextStop.lng
+      ? { latitude: nextStop.lat, longitude: nextStop.lng }
+      : null;
+
+  // 🧠 Create a unique key to force re-render when location or nextStop changes
+  const mapKey = useMemo(
+    () => `${lat}-${long}-${nextStop?.lat || ''}-${nextStop?.lng || ''}`,
+    [lat, long, nextStop]
+  );
+
   return (
     <MapView
-      style={{ width: '100%', height: '100%' }}
+      key={mapKey} // 👈 force remount on key change
+      style={{ flex: 1 }}
       region={{
         latitude: lat,
         longitude: long,
-        latitudeDelta: latDelta,
-        longitudeDelta: longDelta,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
       }}
-      minZoomLevel={10}
-      maxZoomLevel={20}
-      zoomEnabled>
-
-      <Marker coordinate={{ latitude: lat, longitude: long }} description="Your Location">
+    >
+      <Marker coordinate={currentLocation} >
         <Callout>
           <View style={{ height: verticalScale(50), width: horizontalScale(50) }}>
             <Text style={{ color: PRIOR_FONT_COLOR, fontSize: moderateScale(16) }}>Your Location</Text>
@@ -34,25 +56,14 @@ const MapDisplay = ({ lat, long, latDelta, longDelta, nextStop, getTextWithoutHT
         </Callout>
       </Marker>
 
-      {Object.keys(nextStop).length > 0 && (
-        <>
-          <Marker coordinate={{ latitude: nextStop?.lat, longitude: nextStop?.lng }}>
-            <Callout>
-              <View style={{ height: verticalScale(120), width: horizontalScale(200) }}>
-                <Text style={{ color: PRIOR_FONT_COLOR, fontSize: moderateScale(16) }}>
-                  {getTextWithoutHTMLTags(nextStop?.customer_address)}
-                </Text>
-              </View>
-            </Callout>
-          </Marker>
-          <MapViewDirections
-            origin={{ latitude: lat, longitude: long }}
-            destination={{ latitude: nextStop?.lat, longitude: nextStop?.lng }}
-            apikey={''} // Put your API Key here
-            strokeWidth={3}
-            strokeColor={SECONDARY_COLOR}
-          />
-        </>
+      {nextLocation && <Marker coordinate={nextLocation} />}
+
+      {nextLocation && (
+        <Polyline
+          coordinates={[currentLocation, nextLocation]}
+          strokeColor={SECONDARY_COLOR}
+          strokeWidth={4}
+        />
       )}
     </MapView>
   );
