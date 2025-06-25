@@ -14,12 +14,13 @@ import {
   PRIMARY_COLOR,
   LOW_PRIOR_FONT_COLOR,
 } from '../assets/colors/colors';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ProfileScreen = () => {
   const { employee, logout } = useAuth();
 
   return (
-    <>
+    <SafeAreaView style={styles.container}>
       <View style={styles.container}>
         {/* Profile Header */}
         <Text
@@ -111,7 +112,7 @@ const ProfileScreen = () => {
           </Text>
         </View>
       </TouchableOpacity>
-    </>
+    </SafeAreaView>
   );
 };
 

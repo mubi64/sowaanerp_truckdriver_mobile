@@ -31,7 +31,7 @@ const VisitedStopItem = ({ item }) => {
                 color: PRIOR_FONT_COLOR,
                 fontSize: moderateScale(20),
               }}>
-              {item?.address}
+              {item?.custom_address_name || item?.address}
             </Text>
             <Text
               style={{
@@ -49,7 +49,7 @@ const VisitedStopItem = ({ item }) => {
             size={moderateScale(25)}
           />
         </View>
-        <View style={{ height: verticalScale(45) }} />
+        <View style={{ height: verticalScale(22) }} />
       </TouchableOpacity>
     </View>
   );

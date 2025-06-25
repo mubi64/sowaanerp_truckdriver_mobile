@@ -71,7 +71,7 @@ function MyTabBar({ state, descriptors, navigation }) {
 }
 
 const getTabBarVisibility = (route) => {
-  const hiddenScreens = ['Details'];
+  const hiddenScreens = ['Details', 'Items'];
   const routeName = getFocusedRouteNameFromRoute(route) ?? '';
   return !hiddenScreens.includes(routeName);
 };
@@ -81,7 +81,14 @@ function MyTabs() {
     <Tab.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}
       tabBar={props => <MyTabBar {...props} />}
     >
-      <Tab.Screen name="Home" component={HomeStack} />
+      {/* <Tab.Screen name="Home" component={HomeStack} /> */}
+      <Tab.Screen
+        name="Home"
+        component={HomeStack}
+        options={({ route }) => ({
+          tabBarStyle: { display: getTabBarVisibility(route) ? 'flex' : 'none' },
+        })}
+      />
       <Tab.Screen
         name="LastOrder"
         component={LastOrderStack}

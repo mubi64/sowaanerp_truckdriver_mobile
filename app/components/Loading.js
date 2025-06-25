@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
-import { PRIMARY_COLOR, PRIOR_FONT_COLOR, SECONDARY_COLOR } from '../assets/colors/colors';
+import { LOW_PRIOR_FONT_COLOR, PRIMARY_COLOR, PRIOR_FONT_COLOR, SECONDARY_COLOR } from '../assets/colors/colors';
 import { horizontalScale, moderateScale, verticalScale } from '../helpers/responsive';
 
 const Loading = () => {
@@ -9,7 +9,7 @@ const Loading = () => {
         <View style={styles.loadingContainer}>
             <View style={styles.loadingBox}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <ActivityIndicator size={'large'} color={SECONDARY_COLOR} />
+                    <ActivityIndicator size={'small'} color={SECONDARY_COLOR} />
                     <Text style={styles.loadingText}> Loading...</Text>
                 </View>
             </View>
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     },
     loadingText: {
         fontSize: moderateScale(25),
-        color: PRIOR_FONT_COLOR,
+        color: LOW_PRIOR_FONT_COLOR,
     },
 });
 
