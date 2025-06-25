@@ -5,6 +5,7 @@ import HomeScreen from '../screens/home-screen';
 import DetailsScreen from '../screens/details';
 import LastOrderScreen from '../screens/lastorders';
 import Items from '../screens/Items';
+import DriverSignatureScreen from '../screens/signaturescreen';
 
 const Stack = createStackNavigator();
 
@@ -14,7 +15,9 @@ const createStack = (initialRoute, screens) => (
     {screens.map(({ name, component }) => (
       <Stack.Screen key={name} name={name} component={component} />
     ))}
-    <Stack.Screen name='Items' component={Items} />
+    {/* <Stack.Screen name="Details" component={DetailsScreen} /> */}
+    <Stack.Screen name="Items" component={Items} />
+    <Stack.Screen name="DriverSignature" component={DriverSignatureScreen} />
   </Stack.Navigator>
 );
 

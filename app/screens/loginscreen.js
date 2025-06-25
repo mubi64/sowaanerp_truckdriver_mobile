@@ -81,7 +81,7 @@ const LoginScreen = props => {
     <ScrollView style={styles.backgroundColor}>
       <View style={styles.loginContainer}>
         <View style={styles.logoContainer}>
-          <Image source={require('./../assets/images/truck-load.png')} style={styles.logoImageSize} />
+          <Image source={require('../assets/images/truck-load.png')} style={styles.logoImageSize} />
         </View>
         <Text style={styles.appTitle}>{'SowaanERP \n Driver App'}</Text>
         <Text style={styles.loginPrompt}>Login to your account</Text>

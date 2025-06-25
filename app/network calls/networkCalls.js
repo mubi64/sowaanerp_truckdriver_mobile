@@ -72,12 +72,12 @@ export const httpPUT = async (url, data) => {
 };
 
 
-export const uploadToERP = async (uri) => {
+export const uploadToERP = async (uri, doctype, name, format) => {
   const resizedImage = await ImageResizer.createResizedImage(
     uri,
     800, // width
     800, // height
-    'JPEG', // format
+    format || 'JPEG', // format
     70 // quality (0-100)
   );
 
@@ -90,8 +90,16 @@ export const uploadToERP = async (uri) => {
     uri: Platform.OS === 'android' ? resizedImage.uri : resizedImage.uri.replace('file://', ''),
     name: fileName,
     type: `image/${fileType}`,
+    optimize: true,
   });
   formData.append('is_private', 0);
+  if (doctype) {
+    formData.append('doctype', doctype);
+  }
+
+  if (name) {
+    formData.append('docname', name);
+  }
 
   const config = {
     headers: {

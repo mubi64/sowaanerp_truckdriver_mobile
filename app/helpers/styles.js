@@ -82,7 +82,7 @@ export const styles = StyleSheet.create({
         width: horizontalScale(30),
         backgroundColor: 'white',
     },
-    container: { flex: 1, backgroundColor: BACKGROUND_COLOR, paddingTop: 40 },
+    container: { flex: 1, backgroundColor: BACKGROUND_COLOR },
     headerContainer: {
         paddingHorizontal: 20,
         paddingVertical: 10,
@@ -298,4 +298,5 @@ export const styles = StyleSheet.create({
     mb_3: { marginBottom: 3 },
     itemCenter: { alignItems: 'center' },
     flexEnd: { justifyContent: 'flex-end' },
+    uploadButton: { flexDirection: 'row', backgroundColor: SECONDARY_COLOR, padding: 10, marginTop: 10, borderRadius: 5, alignItems: 'center', justifyContent: 'center' },
 });

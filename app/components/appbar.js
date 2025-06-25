@@ -72,7 +72,7 @@ const Appbar = () => {
         <View style={styles.appbar}>
             <View style={styles.centerRow}>
                 <Avatar
-                    source={require('./../assets/images/driver_dp.png')}
+                    source={require('../assets/images/driver_dp.png')}
                     size={moderateScale(60)}
                     rounded
                 />
