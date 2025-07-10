@@ -17,7 +17,7 @@ import { styles } from '../helpers/styles';
 import PrimaryGradientButton from '../components/PrimaryGradientButton';
 import { Icon, Input } from '@rneui/themed';
 
-const LoginScreen = props => {
+const LoginScreen = () => {
   const [passwordSecureEntry, setPasswordSecureEntry] = useState(true);
   const { login } = useAuth();
   const [eemail, seteEmail] = useState('');
@@ -58,11 +58,10 @@ const LoginScreen = props => {
         await StoreItem('EMAIL', `${eemail.trim()}`);
         await StoreItem('PASSWORD', `${password.trim()}`);
       }
-      const res = await httpPOST(`/api/method/login`, {
+      const res = await httpPOST('/api/method/login', {
         usr: eemail,
         pwd: password,
       });
-      // console.log(res, "REsponce data checking");
       if (res.error !== undefined) {
         Toast.show({
           type: 'error',
@@ -85,7 +84,7 @@ const LoginScreen = props => {
         </View>
         <Text style={styles.appTitle}>{'SowaanERP \n Driver App'}</Text>
         <Text style={styles.loginPrompt}>Login to your account</Text>
-        <View style={{ height: 20 }} />
+        <View style={styles.spacer20} />
         <Input
           allowFontScaling={false}
           keyboardType="url"

@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, Platform } from 'react-native';
-import { Avatar } from '@rneui/base';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useAuth } from '../context/auth-context';
 import { styles } from '../helpers/styles';
@@ -15,6 +14,7 @@ import {
   LOW_PRIOR_FONT_COLOR,
 } from '../assets/colors/colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Avatar } from 'react-native-elements';
 
 const ProfileScreen = () => {
   const { employee, logout } = useAuth();

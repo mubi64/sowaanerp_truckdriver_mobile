@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -20,15 +20,40 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { SECONDARY_COLOR } from '../assets/colors/colors';
 import QuantityInput from '../components/QuantityInput';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Button, Overlay, ListItem } from '@rneui/themed';
 
 const Items = ({ route }) => {
     const navigation = useNavigation();
     const { note, trip, stop } = route.params;
     const [dNote, setDNote] = useState([]);
     const [items, setItems] = useState([]);
+    const [reasons, setReasons] = useState([]);
+
     const [deliveredQty, setDeliveredQty] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [selectedReasons, setSelectedReasons] = useState([]);
+    const [visibleOverlays, setVisibleOverlays] = useState([]);
+
+    const openOverlay = (i) => {
+        const updated = [...visibleOverlays];
+        updated[i] = true;
+        setVisibleOverlays(updated);
+    };
+
+    const closeOverlay = (i) => {
+        const updated = [...visibleOverlays];
+        updated[i] = false;
+        setVisibleOverlays(updated);
+    };
+
+    const handleSelect = (value, i) => {
+        const updated = [...selectedReasons];
+        updated[i] = value;
+        setSelectedReasons(updated);
+        closeOverlay(i);
+    };
+
 
     useFocusEffect(
         useCallback(() => {
@@ -61,6 +86,28 @@ const Items = ({ route }) => {
             getDeliveryNotes();
         }, [note])
     );
+
+    useEffect(() => {
+        const getDeliveryReasons = async () => {
+            try {
+                const response = await httpGet(`/api/resource/Delivery%20Reason?limit_page_length=5000&fields=["name","enabled"]&filters=[["enabled","=",1]]`);
+                if (response?.data) {
+                    setReasons(response.data);
+                } else {
+                    setReasons([{ name: 'Other', enabled: 1 }])
+                }
+            } catch (error) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Error',
+                    text2: error.message,
+                    position: 'top',
+                });
+            }
+        }
+        getDeliveryReasons();
+    }, []);
+
 
     const toggleDelivered = (index) => {
         const updated = [...items];
@@ -184,7 +231,7 @@ const Items = ({ route }) => {
                             qty: returnedQty,
                             custom_return: 1,
                             custom_delivered: 0,
-                            custom_item_images: "",
+                            custom_item_images: '',
                             custom_reason: 'Partially delivered - balance returned', // or item.custom_reason
                         });
                     }
@@ -282,12 +329,43 @@ const Items = ({ route }) => {
                 </View>
                 {item.custom_return && (
                     <View>
-                        <TextInput
-                            placeholder="Reason for return"
-                            placeholderTextColor="black"
-                            value={item.custom_reason}
-                            onChangeText={text => handleReasonChange(text, index)}
-                            style={styles.input} />
+                        <View style={{ marginVertical: 20 }}>
+                            <TouchableOpacity onPress={() => openOverlay(index)}>
+                                <Text style={{
+                                    padding: 10,
+                                    borderWidth: 1,
+                                    borderRadius: 5,
+                                    borderColor: '#ccc'
+                                }}>
+                                    {selectedReasons[index] || 'Select Reason'}
+                                </Text>
+                            </TouchableOpacity>
+                            <Overlay overlayStyle={{ width: '90%' }} isVisible={visibleOverlays[index]}
+                                onBackdropPress={() => closeOverlay(index)}>
+                                <View>
+                                    {reasons && reasons.map((option, id) => (
+                                        <ListItem key={id} onPress={() => {
+                                            handleSelect(option.name, index);
+                                            if (option.name !== 'Other') {
+                                                handleReasonChange(option.name, index);
+                                            }
+                                        }}>
+                                            <ListItem.Content>
+                                                <ListItem.Title>{option.name}</ListItem.Title>
+                                            </ListItem.Content>
+                                        </ListItem>
+                                    ))}
+                                </View>
+                            </Overlay>
+                        </View>
+                        {selectedReasons[index] === 'Other' &&
+                            <TextInput
+                                placeholder="Reason for return"
+                                placeholderTextColor="black"
+                                value={item.custom_reason}
+                                onChangeText={text => handleReasonChange(text, index)}
+                                style={styles.input} />
+                        }
                         <View style={{ marginTop: 10 }}>
                             <ScrollView horizontal>
                                 {Array.isArray(item.custom_item_images) && (item.custom_item_images || []).map((imgUri, i) => (
@@ -300,22 +378,25 @@ const Items = ({ route }) => {
                             </TouchableOpacity>
                         </View>
                     </View>
-                )}
-                {item.custom_delivered && (
+                )
+                }
+                {
+                    item.custom_delivered && (
 
-                    <View style={{ marginTop: 10 }}>
-                        <ScrollView horizontal>
-                            {Array.isArray(item.custom_item_images) && (item.custom_item_images || []).map((imgUri, i) => (
-                                <Image key={i} source={{ uri: imgUri }} style={styles.previewImage} />
-                            ))}
-                        </ScrollView>
-                        <TouchableOpacity style={styles.uploadButton} onPress={() => handleUploadImage(index)}>
-                            <Icon name="camera" type="feather" color="#fff" />
-                            <Text style={styles.uploadText}>Add Image</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-            </View>
+                        <View style={{ marginTop: 10 }}>
+                            <ScrollView horizontal>
+                                {Array.isArray(item.custom_item_images) && (item.custom_item_images || []).map((imgUri, i) => (
+                                    <Image key={i} source={{ uri: imgUri }} style={styles.previewImage} />
+                                ))}
+                            </ScrollView>
+                            <TouchableOpacity style={styles.uploadButton} onPress={() => handleUploadImage(index)}>
+                                <Icon name="camera" type="feather" color="#fff" />
+                                <Text style={styles.uploadText}>Add Image</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )
+                }
+            </View >
         );
     };
 
