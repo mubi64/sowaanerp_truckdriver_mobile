@@ -31,7 +31,6 @@ import VisitedStopItem from '../components/ActionSheet/VisitedStopItem';
 import NextStopItem from '../components/ActionSheet/NextStopItem';
 import MapDisplay from '../components/MapDisplay';
 import BackButton from '../components/BackButton';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 const DetailsScreen = ({ route, navigation }) => {
   const scrollViewRef = useRef(null);
@@ -136,7 +135,13 @@ const DetailsScreen = ({ route, navigation }) => {
   return (
     <View style={{ flex: 1, backgroundColor: PRIMARY_COLOR }}>
       <MapDisplay nextStop={nextStop.length > 0 ? nextStop[0] : {}} getTextWithoutHTMLTags={getTextWithoutHTMLTags} />
-      <BackButton onPress={() => navigation.goBack()} />
+      <BackButton onPress={() => {
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        } else {
+          navigation.navigate('Home'); // Replace 'Home' with your actual route name
+        }
+      }} />
 
       <PanGestureHandler
         activeOffsetY={[-10, 10]}

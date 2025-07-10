@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Text, View, PermissionsAndroid, Platform } from 'react-native';
 import GetLocation from 'react-native-get-location';
 import { styles } from '../helpers/styles';
-import { Avatar } from '@rneui/base';
 import { moderateScale } from '../helpers/responsive';
 import { Icon } from '@rneui/themed';
 import { SECONDARY_COLOR } from '../assets/colors/colors';
 import { useAuth } from '../context/auth-context';
+import { Avatar } from 'react-native-elements';
 
 
 const Appbar = () => {

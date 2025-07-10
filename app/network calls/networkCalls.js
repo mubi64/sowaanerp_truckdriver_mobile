@@ -27,7 +27,7 @@ export const httpGet = async (url) => {
       credentials: 'include',
     });
 
-    console.log('API response GET:', url, response);
+    // console.log('API response GET:', url, response);
     return await handleResponse(response);
   } catch (error) {
     console.error('GET Error on Network line 29:', error);

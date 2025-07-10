@@ -36,6 +36,9 @@ export const styles = StyleSheet.create({
         fontWeight: '700',
         textAlign: 'center',
     },
+    spacer20: {
+        height: 20,
+    },
     inputContainer: {
         width: horizontalScale(330),
         height: verticalScale(60),
