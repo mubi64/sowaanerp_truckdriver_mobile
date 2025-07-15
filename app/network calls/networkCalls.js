@@ -109,6 +109,7 @@ export const uploadToERP = async (uri, doctype, name, format) => {
 
   try {
     const res = await axios.post(`${BaseUrl}/api/method/upload_file`, formData, config);
+    console.log('success images upload', res.data.message);
     return res.data.message.file_url;
   } catch (err) {
     console.error('Upload failed:', err.response?.data || err);

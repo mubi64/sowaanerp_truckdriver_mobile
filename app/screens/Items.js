@@ -124,7 +124,7 @@ const Items = ({ route }) => {
         updated[index].custom_return = !updated[index].custom_return;
         if (updated[index].custom_return) {
             updated[index].custom_delivered = false;
-            updated[index].custom_item_images = [];
+            updated[index].x = [];
         }
         setItems(updated);
     };
@@ -133,20 +133,6 @@ const Items = ({ route }) => {
         const updated = [...items];
         updated[index].custom_reason = text;
         setItems(updated);
-    };
-
-    const handleQtyChange = (text, index) => {
-        if (text > items[index].qty) {
-            Toast.show({
-                type: 'error',
-                text1: 'Invalid Quantity',
-                text2: `Delivered quantity cannot exceed ${items[index].qty}`,
-                position: 'top',
-            });
-            setDeliveredQty(prev => ({ ...prev, [index]: items[index].qty.toString() || items[index].qty.toString() }));
-            return;
-        }
-        setDeliveredQty(prev => ({ ...prev, [index]: text || items[index].qty.toString() }));
     };
 
     const handleUploadImage = (index) => {
@@ -221,40 +207,47 @@ const Items = ({ route }) => {
             const returnNoteItems = [];
             const updatedItems = await Promise.all(
                 items.map(async (item, i) => {
-                    const delivered = parseFloat(deliveredQty[i] || item.qty);
-                    const original = parseFloat(item.qty);
-
-                    if (item.custom_delivered && delivered < original) {
-                        const returnedQty = original - delivered;
-                        returnNoteItems.push({
-                            ...item,
-                            qty: returnedQty,
-                            custom_return: 1,
-                            custom_delivered: 0,
-                            custom_item_images: '',
-                            custom_reason: 'Partially delivered - balance returned', // or item.custom_reason
-                        });
-                    }
-                    if (item.custom_delivered && item.custom_item_images?.length) {
-                        const uploaded = await Promise.all(
-                            item.custom_item_images.map(async (uri) =>
-                                uri.startsWith('file') ? await uploadToERP(uri) : uri
-                            )
-                        );
-                        return { ...item, custom_item_images: uploaded };
-                    }
-                    return item;
+                    const uploadedImages = await Promise.all(
+                        (item.custom_item_images || []).map(async (uri) =>
+                            uri.startsWith('file') ? await uploadToERP(uri) : uri
+                        )
+                    );
+                    return { ...item, custom_item_images: uploadedImages };
                 })
             );
+            const deliveredItems = updatedItems.map((item, i) => {
+                const delivered = parseFloat(deliveredQty[i] > 0 ? deliveredQty[i] : item.qty);
+                const original = parseFloat(item.qty);
 
-            const payload = {
-                items: updatedItems.map(item => ({
+                if (item.custom_delivered && delivered < original) {
+                    const returnedQty = original - delivered;
+                    returnNoteItems.push({
+                        ...item,
+                        qty: returnedQty * -1,
+                        stock_qty: returnedQty * -1,
+                        custom_return: 1,
+                        custom_delivered: 0,
+                        custom_item_images: item.custom_item_images.toString(),
+                        custom_first_image: item.custom_item_images?.[0] || '',
+                        custom_second_image: item.custom_item_images?.[1] || '',
+                        custom_third_image: item.custom_item_images?.[2] || '',
+                        // custom_item_images: '',
+                        // custom_reason: 'Partially delivered - balance returned', // or item.custom_reason
+                    });
+                }
+                return {
                     ...item,
                     custom_item_images: item.custom_item_images.toString(),
+                    custom_first_image: item.custom_item_images?.[0] || '',
+                    custom_second_image: item.custom_item_images?.[1] || '',
+                    custom_third_image: item.custom_item_images?.[2] || '',
                     custom_delivered: item.custom_delivered || 0,
                     custom_return: item.custom_return || 0,
                     custom_reason: item.custom_reason || '',
-                })),
+                };
+            });
+            const payload = {
+                items: deliveredItems,
             };
 
             const response = await httpPUT(`/api/resource/Delivery Note/${note}`, payload);
@@ -327,7 +320,7 @@ const Items = ({ route }) => {
                         min={0}
                         max={item.qty} />
                 </View>
-                {item.custom_return && (
+                {item.custom_return || (deliveredQty[index] < item.qty) ?
                     <View>
                         <View style={{ marginVertical: 20 }}>
                             <TouchableOpacity onPress={() => openOverlay(index)}>
@@ -366,35 +359,40 @@ const Items = ({ route }) => {
                                 onChangeText={text => handleReasonChange(text, index)}
                                 style={styles.input} />
                         }
-                        <View style={{ marginTop: 10 }}>
-                            <ScrollView horizontal>
-                                {Array.isArray(item.custom_item_images) && (item.custom_item_images || []).map((imgUri, i) => (
-                                    <Image key={i} source={{ uri: imgUri }} style={styles.previewImage} />
-                                ))}
-                            </ScrollView>
+                    </View> : null
+                }
+
+                {item.custom_return && (
+                    <View style={{ marginTop: 10 }}>
+                        <ScrollView horizontal>
+                            {Array.isArray(item.custom_item_images) && (item.custom_item_images || []).map((imgUri, i) => (
+                                <Image key={i} source={{ uri: imgUri }} style={styles.previewImage} />
+                            ))}
+                        </ScrollView>
+                        {item.custom_item_images.length < 3 &&
                             <TouchableOpacity style={styles.uploadButton} onPress={() => handleUploadImage(index)}>
                                 <Icon name="camera" type="feather" color="#fff" />
                                 <Text style={styles.uploadText}>Add Image</Text>
                             </TouchableOpacity>
-                        </View>
+                        }
                     </View>
                 )
                 }
-                {
-                    item.custom_delivered && (
-
-                        <View style={{ marginTop: 10 }}>
-                            <ScrollView horizontal>
-                                {Array.isArray(item.custom_item_images) && (item.custom_item_images || []).map((imgUri, i) => (
-                                    <Image key={i} source={{ uri: imgUri }} style={styles.previewImage} />
-                                ))}
-                            </ScrollView>
+                {item.custom_delivered && (
+                    <View style={{ marginTop: 10 }}>
+                        <ScrollView horizontal>
+                            {Array.isArray(item.custom_item_images) && (item.custom_item_images || []).map((imgUri, i) => (
+                                <Image key={i} source={{ uri: imgUri }} style={styles.previewImage} />
+                            ))}
+                        </ScrollView>
+                        {item.custom_item_images.length < 3 &&
                             <TouchableOpacity style={styles.uploadButton} onPress={() => handleUploadImage(index)}>
                                 <Icon name="camera" type="feather" color="#fff" />
                                 <Text style={styles.uploadText}>Add Image</Text>
                             </TouchableOpacity>
-                        </View>
-                    )
+                        }
+                    </View>
+                )
                 }
             </View >
         );
