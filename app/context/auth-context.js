@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { StoreItem, DeleteItem } from '../async-storage/async-storage';
-import { httpGet } from '../network calls/networkCalls';
+import { httpGet, httpPOST } from '../network calls/networkCalls';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -14,9 +14,11 @@ export const AuthProvider = ({ children }) => {
     StoreItem('userLoggedIn', 'true');
   };
 
-  const logout = () => {
-    // Logic for user logout
+  const logout = async () => {
+    // End the ERP session so the next driver on this device can't reuse it
+    await httpPOST('/api/method/logout', {});
     setUser(null);
+    setEmployee('');
     DeleteItem('userLoggedIn');
   };
 

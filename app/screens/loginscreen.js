@@ -6,7 +6,7 @@ import {
   ScrollView,
   Switch,
 } from 'react-native';
-import { StoreItem, GetItem } from '../async-storage/async-storage';
+import { StoreItem, GetItem, DeleteItem } from '../async-storage/async-storage';
 import { moderateScale } from '../helpers/responsive';
 import { LOW_PRIOR_FONT_COLOR, SECONDARY_COLOR } from '../assets/colors/colors';
 import Toast from 'react-native-toast-message';
@@ -78,6 +78,9 @@ const LoginScreen = () => {
       if (remember) {
         await StoreItem('EMAIL', `${eemail.trim()}`);
         await StoreItem('PASSWORD', `${password.trim()}`);
+      } else {
+        await DeleteItem('EMAIL');
+        await DeleteItem('PASSWORD');
       }
       const res = await httpPOST('/api/method/login', {
         usr: eemail,
