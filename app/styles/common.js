@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { BACKGROUND_COLOR, LOW_PRIOR_FONT_COLOR, PRIMARY_COLOR, PRIOR_FONT_COLOR, SECONDARY_COLOR } from '../assets/colors/colors';
-import { horizontalScale, moderateScale, verticalScale } from './responsive';
+import { horizontalScale, moderateScale, verticalScale } from '../helpers/responsive';
 
 export const styles = StyleSheet.create({
     flex_1: { flex: 1 },
@@ -80,6 +80,8 @@ export const styles = StyleSheet.create({
         color: PRIOR_FONT_COLOR,
         fontWeight: 'bold', fontSize: 16,
     },
+    appbarTextContainer: { marginLeft: 8 },
+    appbarBell: { borderRadius: 100 },
     notify_container: {
         height: verticalScale(30),
         width: horizontalScale(30),
@@ -296,10 +298,21 @@ export const styles = StyleSheet.create({
         bottom: -21,
         left: 40,
     },
+    statusText: { color: 'white', fontWeight: '600' },
+    // Spacing & layout helpers
+    mt_5: { marginTop: verticalScale(5) },
     mt_10: { marginTop: verticalScale(10) },
     mt_20: { marginTop: verticalScale(20) },
     mb_3: { marginBottom: 3 },
+    spacer10: { height: verticalScale(10) },
+    flexGrow_1: { flexGrow: 1 },
     itemCenter: { alignItems: 'center' },
     flexEnd: { justifyContent: 'flex-end' },
+    textRight: { textAlign: 'right' },
+    // Form & image upload
+    borderedInput: { borderColor: '#ccc', borderWidth: 1, paddingHorizontal: 10, borderRadius: 5 },
+    imageSection: { marginTop: 10 },
+    previewImage: { width: 80, height: 80, marginRight: 8, borderRadius: 8, borderWidth: 1, borderColor: '#ccc' },
     uploadButton: { flexDirection: 'row', backgroundColor: SECONDARY_COLOR, padding: 10, marginTop: 10, borderRadius: 5, alignItems: 'center', justifyContent: 'center' },
+    uploadText: { color: '#fff', marginLeft: 8, fontWeight: '600' },
 });
