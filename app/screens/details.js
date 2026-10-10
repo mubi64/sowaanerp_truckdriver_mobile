@@ -13,18 +13,10 @@ import Toast from 'react-native-toast-message';
 import { FlatList, PanGestureHandler } from 'react-native-gesture-handler';
 
 import PrimaryGradientButton from '../components/PrimaryGradientButton';
-import {
-  LOW_PRIOR_FONT_COLOR,
-  PRIMARY_COLOR,
-  PRIOR_FONT_COLOR,
-  LIGHT_GREY,
-  SECONDARY_COLOR,
-} from '../assets/colors/colors';
-import {
-  horizontalScale,
-  verticalScale,
-  moderateScale,
-} from '../helpers/responsive';
+import { verticalScale } from '../helpers/responsive';
+import { styles } from '../styles/common';
+import { detailsStyles } from '../styles/screens/details.styles';
+import { stopItemStyles } from '../styles/components/stopItem.styles';
 import { httpGet, httpPUT } from '../network calls/networkCalls';
 import LoadingOverlay from '../components/LoadingOverlay';
 import VisitedStopItem from '../components/ActionSheet/VisitedStopItem';
@@ -133,7 +125,7 @@ const DetailsScreen = ({ route, navigation }) => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: PRIMARY_COLOR }}>
+    <View style={detailsStyles.container}>
       <MapDisplay nextStop={nextStop.length > 0 ? nextStop[0] : {}} getTextWithoutHTMLTags={getTextWithoutHTMLTags} />
       <BackButton onPress={() => {
         if (navigation.canGoBack()) {
@@ -146,43 +138,43 @@ const DetailsScreen = ({ route, navigation }) => {
       <PanGestureHandler
         activeOffsetY={[-10, 10]}
         onGestureEvent={e => e.nativeEvent.translationY < 0 ? bringUpActionSheet() : endUpActionSheet()}>
-        <Animated.View style={{ width: horizontalScale(375), height: verticalScale(665.4), position: 'absolute', bottom: actionSheetInterpolate }}>
-          <View style={{ backgroundColor: PRIMARY_COLOR, borderTopLeftRadius: 25, borderTopRightRadius: 25, height: verticalScale(146.16) }}>
-            <View style={{ width: horizontalScale(56.25), height: verticalScale(4), marginTop: verticalScale(10), borderRadius: 15, alignSelf: 'center', backgroundColor: LIGHT_GREY }} />
-            <View style={{ height: verticalScale(17) }} />
-            <View style={{ width: horizontalScale(310), height: verticalScale(100), alignSelf: 'center', flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Animated.View style={[detailsStyles.actionSheet, { bottom: actionSheetInterpolate }]}>
+          <View style={detailsStyles.sheetHeader}>
+            <View style={detailsStyles.dragHandle} />
+            <View style={detailsStyles.spacer17} />
+            <View style={detailsStyles.summaryRow}>
               <View>
-                <Text style={{ fontFamily: 'Outfit-Medium', fontSize: moderateScale(20), color: PRIOR_FONT_COLOR, fontWeight: '700', marginTop: verticalScale(2) }}>
+                <Text style={detailsStyles.summaryText}>
                   {nextStop.length > 0 ? moment(nextStop[0]?.estimated_arrival).format('MMM D HH:mm') : null}
                 </Text>
-                <Text style={{ fontFamily: 'Outfit-Medium', fontSize: moderateScale(20), color: PRIOR_FONT_COLOR, fontWeight: '700', letterSpacing: horizontalScale(1), marginTop: verticalScale(2) }}>
+                <Text style={[detailsStyles.summaryText, detailsStyles.summaryDistance]}>
                   {nextStop.length > 0 ? `${nextStop[0]?.distance}${nextStop[0]?.uom === 'Meter' ? ' m' : ''} on way` : 'WELL DONE!'}
                 </Text>
-                <Text style={{ fontFamily: 'Outfit-Medium', fontSize: moderateScale(16), color: LOW_PRIOR_FONT_COLOR, fontWeight: '700', marginTop: verticalScale(2) }}>
+                <Text style={detailsStyles.summarySubText}>
                   {nextStop.length > 0 ? 'Next stop estimated time with distance' : 'Job Completed'}
                 </Text>
               </View>
             </View>
           </View>
 
-          <Divider style={{ width: horizontalScale(375), borderWidth: 1, borderColor: LIGHT_GREY }} />
+          <Divider style={detailsStyles.divider} />
 
-          <ScrollView ref={scrollViewRef} contentContainerStyle={{ backgroundColor: 'white' }} style={{ flex: 1 }}>
-            <View style={{ height: verticalScale(519.5), width: horizontalScale(375), backgroundColor: PRIMARY_COLOR }}>
-              <View style={{ height: verticalScale(25) }} />
-              <Text style={{ fontFamily: 'Outfit-Medium', color: PRIOR_FONT_COLOR, fontSize: moderateScale(25), marginLeft: horizontalScale(25) }}>
+          <ScrollView ref={scrollViewRef} contentContainerStyle={detailsStyles.scrollContent} style={styles.flex_1}>
+            <View style={detailsStyles.routePanel}>
+              <View style={detailsStyles.spacer25} />
+              <Text style={detailsStyles.routeTitle}>
                 Route Details
               </Text>
-              <View style={{ height: verticalScale(15) }} />
-              <View style={{ width: horizontalScale(375), alignSelf: 'center', height: verticalScale(230), backgroundColor: 'white', marginTop: verticalScale(5) }}>
-                <View style={{ width: horizontalScale(345), alignSelf: 'center', flexDirection: 'row' }}>
+              <View style={detailsStyles.spacer15} />
+              <View style={detailsStyles.routeList}>
+                <View style={stopItemStyles.timelineRow}>
                   <View>
                     {visited.map((_, index) => (
-                      <View key={`dot-${index}`} style={{ marginTop: verticalScale(5) }}>
-                        <View style={{ width: horizontalScale(12), height: horizontalScale(12), borderRadius: horizontalScale(12) / 2, borderColor: LOW_PRIOR_FONT_COLOR, borderWidth: 2 }} />
+                      <View key={`dot-${index}`} style={styles.mt_5}>
+                        <View style={[stopItemStyles.dot, stopItemStyles.dotVisited]} />
 
-                        {!(visited.length - 1 === index) && <View style={{ width: horizontalScale(12) }}>
-                          <View style={{ width: horizontalScale(0.5), height: verticalScale(40), borderWidth: 0.5, borderStyle: 'dashed', borderColor: LOW_PRIOR_FONT_COLOR, alignSelf: 'center', marginTop: verticalScale(5) }} />
+                        {!(visited.length - 1 === index) && <View style={stopItemStyles.lineContainer}>
+                          <View style={[stopItemStyles.line, stopItemStyles.lineVisited]} />
                         </View>}
                       </View>
                     ))}
@@ -203,7 +195,7 @@ const DetailsScreen = ({ route, navigation }) => {
           </ScrollView>
 
           {checkedIndex !== null && (
-            <View style={{ position: 'absolute', bottom: verticalScale(10), marginHorizontal: 30 }}>
+            <View style={detailsStyles.nextButtonContainer}>
               <PrimaryGradientButton onPress={onComplete} text="Next" />
             </View>
           )}

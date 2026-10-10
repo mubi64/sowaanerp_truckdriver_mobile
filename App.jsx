@@ -10,7 +10,7 @@ import Toast from 'react-native-toast-message';
 
 import {AuthProvider} from './app/context/auth-context';
 import HomeScreen from './app/screens/splash';
-import {styles} from './app/helpers/styles';
+import {styles} from './app/styles/common';
 
 const App = () => {
   return (

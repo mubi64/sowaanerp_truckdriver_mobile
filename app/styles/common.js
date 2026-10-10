@@ -5,40 +5,6 @@ import { horizontalScale, moderateScale, verticalScale } from '../helpers/respon
 export const styles = StyleSheet.create({
     flex_1: { flex: 1 },
     backgroundColor: { backgroundColor: BACKGROUND_COLOR },
-    loginContainer: {
-        flex: 1,
-        alignItems: 'center',
-        paddingVertical: verticalScale(80),
-    },
-    logoContainer: {
-        width: horizontalScale(120),
-        height: horizontalScale(120),
-        borderRadius: horizontalScale(200),
-        backgroundColor: 'white',
-        justifyContent: 'center',
-        alignItems: 'center',
-        elevation: 6,
-    },
-    logoImageSize: {
-        width: horizontalScale(90),
-        height: verticalScale(80),
-    },
-    appTitle: {
-        fontSize: moderateScale(30),
-        color: SECONDARY_COLOR,
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    loginPrompt: {
-        fontFamily: 'Proxima Nova',
-        fontSize: moderateScale(20),
-        color: PRIOR_FONT_COLOR,
-        fontWeight: '700',
-        textAlign: 'center',
-    },
-    spacer20: {
-        height: 20,
-    },
     inputContainer: {
         width: horizontalScale(330),
         height: verticalScale(60),

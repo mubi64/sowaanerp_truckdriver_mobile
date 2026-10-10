@@ -1,5 +1,6 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { LOW_PRIOR_FONT_COLOR, PRIMARY_COLOR, PRIOR_FONT_COLOR, SECONDARY_COLOR } from '../assets/colors/colors';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { LOW_PRIOR_FONT_COLOR, PRIOR_FONT_COLOR, SECONDARY_COLOR } from '../assets/colors/colors';
+import { tabBarStyles as styles } from '../styles/components/tabBar.styles';
 import { HomeStack, LastOrderStack } from './stacknavigation';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { moderateScale } from '../helpers/responsive';
@@ -100,18 +101,5 @@ function MyTabs() {
     </Tab.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 10,
-    paddingBottom: 20,
-    borderTopColor: '#ddd',
-    borderTopWidth: 1,
-    backgroundColor: PRIMARY_COLOR,
-  },
-  tabButton: { alignItems: 'center' },
-});
 
 export default MyTabs;

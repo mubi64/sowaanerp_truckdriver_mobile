@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, TouchableOpacity } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { styles } from '../helpers/styles';
+import { styles } from '../styles/common';
 
 const PrimaryGradientButton = ({onPress, text}) => {
     return (

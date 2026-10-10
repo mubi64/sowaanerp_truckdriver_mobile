@@ -1,16 +1,17 @@
 import React, { useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, TextInput, TouchableOpacity } from 'react-native';
 import { Alert } from 'react-native';
-import { StyleSheet, View, Image, Text, ScrollView } from 'react-native';
+import { View, Image, Text, ScrollView } from 'react-native';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { Icon } from '@rneui/base';
 import SignatureCanvas from 'react-native-signature-canvas';
 import Toast from 'react-native-toast-message';
 import { httpPUT, uploadToERP } from '../network calls/networkCalls';
-import { SECONDARY_COLOR } from '../assets/colors/colors';
 import Loading from '../components/Loading';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { styles } from '../styles/common';
+import { signatureStyles } from '../styles/screens/signature.styles';
 
 const DriverSignatureScreen = ({ route }) => {
     const navigation = useNavigation();
@@ -112,18 +113,18 @@ const DriverSignatureScreen = ({ route }) => {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={signatureStyles.container}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={{ flex: 1 }}
+                style={styles.flex_1}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
             >
                 <ScrollView
-                    contentContainerStyle={{ flexGrow: 1 }}
+                    contentContainerStyle={styles.flexGrow_1}
                     keyboardShouldPersistTaps="handled"
                 >
                     <Text>Upload Delivery Note</Text>
-                    <View style={{ marginTop: 10 }}>
+                    <View style={styles.imageSection}>
                         {image &&
                             <Image source={{ uri: image }} style={styles.previewImage} />
                         }
@@ -164,13 +165,13 @@ const DriverSignatureScreen = ({ route }) => {
                         placeholderTextColor="black"
                         value={customrName}
                         onChangeText={text => setCustomrName(text)}
-                        style={styles.input} />
+                        style={[styles.borderedInput, signatureStyles.input]} />
                     <TextInput
                         placeholder="Number"
                         placeholderTextColor="black"
                         value={customerNumber}
                         onChangeText={text => setCustomerNumber(text)}
-                        style={styles.input} />
+                        style={[styles.borderedInput, signatureStyles.input]} />
                     <TouchableOpacity style={styles.uploadButton} onPress={() => handleSave()}>
                         <Icon name="edit" type="feather" color="#fff" />
                         <Text style={styles.uploadText}>Update</Text>
@@ -181,25 +182,5 @@ const DriverSignatureScreen = ({ route }) => {
         </SafeAreaView>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16,
-    },
-    preview: {
-        width: 335,
-        height: 114,
-        backgroundColor: '#F8F8F8',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 15,
-    },
-    input: { borderColor: '#ccc', borderWidth: 1, paddingHorizontal: 10, borderRadius: 5, marginVertical: 10 },
-    previewImage: { width: 80, height: 80, marginRight: 8, borderRadius: 8, borderWidth: 1, borderColor: '#ccc' },
-    uploadText: { color: '#fff', marginLeft: 8, fontWeight: '600' },
-    uploadButton: { flexDirection: 'row', backgroundColor: SECONDARY_COLOR, padding: 10, marginTop: 10, borderRadius: 5, alignItems: 'center', justifyContent: 'center' },
-});
-
 
 export default DriverSignatureScreen;

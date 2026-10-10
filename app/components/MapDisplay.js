@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import MapView, { Callout, Marker, Polyline } from 'react-native-maps';
-import { PRIOR_FONT_COLOR, SECONDARY_COLOR } from '../assets/colors/colors';
+import { SECONDARY_COLOR } from '../assets/colors/colors';
 import GetLocation from 'react-native-get-location';
 import { View, Text } from 'react-native';
-import { horizontalScale, moderateScale, verticalScale } from '../helpers/responsive';
+import { mapDisplayStyles } from '../styles/components/mapDisplay.styles';
 
 const MapDisplay = ({ nextStop, getTextWithoutHTMLTags }) => {
   const [lat, setLat] = useState(24.7138956);
@@ -40,7 +40,7 @@ const MapDisplay = ({ nextStop, getTextWithoutHTMLTags }) => {
   return (
     <MapView
       key={mapKey} // 👈 force remount on key change
-      style={{ flex: 1 }}
+      style={mapDisplayStyles.map}
       region={{
         latitude: lat,
         longitude: long,
@@ -50,8 +50,8 @@ const MapDisplay = ({ nextStop, getTextWithoutHTMLTags }) => {
     >
       <Marker coordinate={currentLocation} >
         <Callout>
-          <View style={{ height: verticalScale(50), width: horizontalScale(50) }}>
-            <Text style={{ color: PRIOR_FONT_COLOR, fontSize: moderateScale(16) }}>Your Location</Text>
+          <View style={mapDisplayStyles.callout}>
+            <Text style={mapDisplayStyles.calloutText}>Your Location</Text>
           </View>
         </Callout>
       </Marker>

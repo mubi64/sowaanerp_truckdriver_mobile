@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View, PermissionsAndroid, Platform } from 'react-native';
 import GetLocation from 'react-native-get-location';
-import { styles } from '../helpers/styles';
+import { styles } from '../styles/common';
 import { moderateScale } from '../helpers/responsive';
 import { Icon } from '@rneui/themed';
 import { SECONDARY_COLOR } from '../assets/colors/colors';
@@ -76,7 +76,7 @@ const Appbar = () => {
                     size={moderateScale(60)}
                     rounded
                 />
-                <View style={{ marginLeft: 8 }}>
+                <View style={styles.appbarTextContainer}>
                     <Text style={styles.greeting}>Hello, {employee && employee.first_name.split(" ", 1)}</Text>
                     <Text style={styles.appbar_location}>
                         {city || errorMsg || 'Getting location...'}
@@ -90,7 +90,7 @@ const Appbar = () => {
                 color={SECONDARY_COLOR}
                 size={moderateScale(20)}
                 onPress={() => { }}
-                containerStyle={{ borderRadius: 100 }}
+                containerStyle={styles.appbarBell}
             />
         </View>
     );

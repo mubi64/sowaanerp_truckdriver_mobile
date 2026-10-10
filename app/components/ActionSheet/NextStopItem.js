@@ -2,62 +2,31 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Icon } from '@rneui/base';
 import moment from 'moment';
-import {
-  horizontalScale,
-  verticalScale,
-  moderateScale,
-} from '../../helpers/responsive';
-import {
-  PRIOR_FONT_COLOR,
-  LOW_PRIOR_FONT_COLOR,
-  SECONDARY_COLOR,
-} from '../../assets/colors/colors';
+import { moderateScale } from '../../helpers/responsive';
+import { SECONDARY_COLOR } from '../../assets/colors/colors';
+import { styles } from '../../styles/common';
+import { stopItemStyles } from '../../styles/components/stopItem.styles';
 
 const NextStopItem = ({ nextStop, check, onToggleCheck, stopLength }) => {
   return (
-    <View
-      style={{
-        width: horizontalScale(345),
-        alignSelf: 'center',
-        flexDirection: 'row',
-        marginTop: verticalScale(5),
-      }}>
-      <View style={{ marginTop: verticalScale(5) }}>
-        <View style={{ width: horizontalScale(12), height: horizontalScale(12), borderRadius: horizontalScale(12) / 2, borderColor: SECONDARY_COLOR, borderWidth: 2 }} />
+    <View style={[stopItemStyles.timelineRow, styles.mt_5]}>
+      <View style={styles.mt_5}>
+        <View style={[stopItemStyles.dot, stopItemStyles.dotNext]} />
         {!stopLength &&
-          <View style={{ width: horizontalScale(12) }}>
-            <View style={{ width: horizontalScale(0.5), height: verticalScale(40), borderWidth: 0.5, borderStyle: 'dashed', borderColor: SECONDARY_COLOR, alignSelf: 'center', marginTop: verticalScale(5) }} />
+          <View style={stopItemStyles.lineContainer}>
+            <View style={[stopItemStyles.line, stopItemStyles.lineNext]} />
           </View>
         }
       </View>
-      <View
-        style={{
-          marginLeft: horizontalScale(10),
-          marginTop: verticalScale(-5),
-        }}>
-        <View
-          style={{
-            width: horizontalScale(300),
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-          }}>
+      <View style={[stopItemStyles.content, stopItemStyles.nextContent]}>
+        <View style={stopItemStyles.header}>
           <View>
-            <Text
-              style={{
-                fontFamily: 'Outfit-Medium',
-                color: PRIOR_FONT_COLOR,
-                fontSize: moderateScale(20),
-              }}>
+            <Text style={stopItemStyles.title}>
               {nextStop?.custom_address_name ||
                 nextStop?.address ||
                 'Next Stop'}
             </Text>
-            <Text
-              style={{
-                fontFamily: 'Outfit-Regular',
-                color: LOW_PRIOR_FONT_COLOR,
-                fontSize: moderateScale(15),
-              }}>
+            <Text style={stopItemStyles.time}>
               {moment(nextStop?.estimated_arrival).format('MMM D HH:mm')}
             </Text>
           </View>

@@ -5,7 +5,6 @@ import {
     TextInput,
     FlatList,
     TouchableOpacity,
-    StyleSheet,
     Alert,
     Image,
     ScrollView,
@@ -17,10 +16,11 @@ import PrimaryGradientButton from '../components/PrimaryGradientButton';
 import Toast from 'react-native-toast-message';
 import Loading from '../components/Loading';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { SECONDARY_COLOR } from '../assets/colors/colors';
 import QuantityInput from '../components/QuantityInput';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Overlay, ListItem } from '@rneui/themed';
+import { styles } from '../styles/common';
+import { itemsStyles } from '../styles/screens/items.styles';
 
 const Items = ({ route }) => {
     const navigation = useNavigation();
@@ -310,15 +310,15 @@ const Items = ({ route }) => {
 
     const renderItem = ({ item, index }) => {
         return (
-            <View key={index} style={styles.itemCard}>
-                <Text style={styles.itemTitle}>{item.item_name} | {item.qty}</Text>
-                <View style={styles.checkboxRow}>
+            <View key={index} style={itemsStyles.itemCard}>
+                <Text style={itemsStyles.itemTitle}>{item.item_name} | {item.qty}</Text>
+                <View style={itemsStyles.checkboxRow}>
                     <CheckBox
-                        containerStyle={styles.checkboxContainer}
+                        containerStyle={itemsStyles.checkboxContainer}
                         title="Delivered" checked={item.custom_delivered} onPress={() => toggleDelivered(index)} />
-                    <CheckBox containerStyle={styles.checkboxContainer} title="Return" checked={item.custom_return} onPress={() => toggleReturn(index)} />
+                    <CheckBox containerStyle={itemsStyles.checkboxContainer} title="Return" checked={item.custom_return} onPress={() => toggleReturn(index)} />
                 </View>
-                <View style={styles.QTYRow}>
+                <View style={itemsStyles.QTYRow}>
                     <QuantityInput
                         value={deliveredQty[index] || item.qty.toString()}
                         setValue={setDeliveredQty}
@@ -329,18 +329,13 @@ const Items = ({ route }) => {
                 </View>
                 {item.custom_return && (
                     <View>
-                        <View style={{ marginVertical: 20 }}>
+                        <View style={itemsStyles.reasonContainer}>
                             <TouchableOpacity onPress={() => openOverlay(index)}>
-                                <Text style={{
-                                    padding: 10,
-                                    borderWidth: 1,
-                                    borderRadius: 5,
-                                    borderColor: '#ccc'
-                                }}>
+                                <Text style={itemsStyles.reasonPicker}>
                                     {selectedReasons[index] || 'Select Reason'}
                                 </Text>
                             </TouchableOpacity>
-                            <Overlay overlayStyle={{ width: '90%' }} isVisible={visibleOverlays[index]}
+                            <Overlay overlayStyle={itemsStyles.reasonOverlay} isVisible={visibleOverlays[index]}
                                 onBackdropPress={() => closeOverlay(index)}>
                                 <View>
                                     {reasons && reasons.map((option, id) => (
@@ -364,9 +359,9 @@ const Items = ({ route }) => {
                                 placeholderTextColor="black"
                                 value={item.custom_reason}
                                 onChangeText={text => handleReasonChange(text, index)}
-                                style={styles.input} />
+                                style={styles.borderedInput} />
                         }
-                        <View style={{ marginTop: 10 }}>
+                        <View style={styles.imageSection}>
                             <ScrollView horizontal>
                                 {Array.isArray(item.custom_item_images) && (item.custom_item_images || []).map((imgUri, i) => (
                                     <Image key={i} source={{ uri: imgUri }} style={styles.previewImage} />
@@ -383,7 +378,7 @@ const Items = ({ route }) => {
                 {
                     item.custom_delivered && (
 
-                        <View style={{ marginTop: 10 }}>
+                        <View style={styles.imageSection}>
                             <ScrollView horizontal>
                                 {Array.isArray(item.custom_item_images) && (item.custom_item_images || []).map((imgUri, i) => (
                                     <Image key={i} source={{ uri: imgUri }} style={styles.previewImage} />
@@ -401,11 +396,11 @@ const Items = ({ route }) => {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={itemsStyles.container}>
             {/* <Appbar /> */}
             {loading ? <Loading /> : error ? (
-                <View style={{ padding: 20 }}>
-                    <Text style={{ color: 'red', fontSize: 16, textAlign: 'center' }}>{error}</Text>
+                <View style={itemsStyles.errorContainer}>
+                    <Text style={itemsStyles.errorText}>{error}</Text>
                 </View>
             ) : (
                 <>
@@ -413,9 +408,9 @@ const Items = ({ route }) => {
                         data={items}
                         keyExtractor={(item, index) => `${item.item_code}_${index}`}
                         renderItem={renderItem}
-                        contentContainerStyle={{ paddingBottom: 80 }}
+                        contentContainerStyle={itemsStyles.listContent}
                     />
-                    <View style={styles.submitContainer}>
+                    <View style={itemsStyles.submitContainer}>
                         <PrimaryGradientButton onPress={handleSubmit} text="Submit" />
                     </View>
                 </>
@@ -425,22 +420,3 @@ const Items = ({ route }) => {
 };
 
 export default Items;
-
-const styles = StyleSheet.create({
-    container: { flex: 1 },
-    itemCard: { backgroundColor: '#f4f4f4', padding: 8, paddingVertical: 6, borderRadius: 10, marginBottom: 10, marginHorizontal: 10 },
-    itemTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
-    checkboxRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', textAlign: 'center' },
-    QTYRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', textAlign: 'center' },
-    input: { borderColor: '#ccc', borderWidth: 1, paddingHorizontal: 10, borderRadius: 5 },
-    uploadButton: { flexDirection: 'row', backgroundColor: SECONDARY_COLOR, padding: 10, marginTop: 10, borderRadius: 5, alignItems: 'center', justifyContent: 'center' },
-    uploadText: { color: '#fff', marginLeft: 8, fontWeight: '600' },
-    submitContainer: { padding: 10, borderTopWidth: 1, borderColor: '#ddd', alignItems: 'center', backgroundColor: '#fff', position: 'absolute', bottom: 0, left: 0, right: 0 },
-    previewImage: { width: 80, height: 80, marginRight: 8, borderRadius: 8, borderWidth: 1, borderColor: '#ccc' },
-    checkboxContainer: {
-        borderWidth: 0,
-        margin: 0,
-        marginRight: 0,
-        borderRadius: 5,
-    },
-});

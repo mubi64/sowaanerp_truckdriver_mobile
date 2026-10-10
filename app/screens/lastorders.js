@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, RefreshControl, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, FlatList, RefreshControl, TouchableOpacity, ActivityIndicator } from 'react-native';
 import {
   LOW_PRIOR_FONT_COLOR,
   PRIMARY_COLOR,
@@ -7,10 +7,7 @@ import {
   SECONDARY_COLOR,
 } from '../assets/colors/colors';
 import moment from 'moment';
-import {
-  verticalScale,
-  moderateScale,
-} from '../helpers/responsive';
+import { moderateScale } from '../helpers/responsive';
 import { useAuth } from '../context/auth-context';
 import CalendarStrip from 'react-native-calendar-strip-moment-modification';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -18,7 +15,7 @@ import { TextInput } from 'react-native';
 import { httpGet } from '../network calls/networkCalls';
 import { Toast } from 'react-native-toast-message/lib/src/Toast';
 import Loading from '../components/Loading';
-import { styles } from '../helpers/styles';
+import { styles } from '../styles/common';
 import Appbar from '../components/appbar';
 import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -89,7 +86,7 @@ const LastOrder = (props) => {
         <CalendarStrip
           scrollable
           showMonth={false}
-          style={{ height: verticalScale(50) }}
+          style={styles.calendar}
           onDateSelected={(date) => getDeliveryTripByDate(moment(date).format('DD-MM-YYYY'))}
           maxDate={maxDate.setDate(theDayOfTheMonthOnTodayWeek)}
           calendarColor={PRIMARY_COLOR}
@@ -99,7 +96,7 @@ const LastOrder = (props) => {
           highlightDateNumberStyle={styles.highlightDateNumberStyle}
         />
       </View>
-      <View style={{ height: verticalScale(10) }} />
+      <View style={styles.spacer10} />
       <View
         style={styles.searchContainer}>
         <Icon name="search" size={24} color={SECONDARY_COLOR} />
@@ -169,7 +166,7 @@ const LastOrder = (props) => {
                 </View>
                 <LinearGradient colors={['#4CAF50', '#1B5E20']} start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }} style={styles.status} >
-                  <Text style={{ color: 'white', fontWeight: '600' }} >{item?.status}</Text>
+                  <Text style={styles.statusText} >{item?.status}</Text>
                 </LinearGradient>
               </TouchableOpacity>
             )

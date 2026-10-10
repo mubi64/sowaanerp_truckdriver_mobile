@@ -2,43 +2,21 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Icon } from '@rneui/base';
 import moment from 'moment';
-import {
-  horizontalScale,
-  verticalScale,
-  moderateScale,
-} from '../../helpers/responsive';
-import {
-  PRIOR_FONT_COLOR,
-  LOW_PRIOR_FONT_COLOR,
-  SECONDARY_COLOR,
-} from '../../assets/colors/colors';
+import { moderateScale } from '../../helpers/responsive';
+import { SECONDARY_COLOR } from '../../assets/colors/colors';
+import { stopItemStyles } from '../../styles/components/stopItem.styles';
 
 const VisitedStopItem = ({ item }) => {
   return (
-    <View style={{ marginLeft: horizontalScale(10) }}>
+    <View style={stopItemStyles.content}>
       <TouchableOpacity onPress={() => console.log("Heelo")
       }>
-        <View
-          style={{
-            width: horizontalScale(300),
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-          }}>
+        <View style={stopItemStyles.header}>
           <View>
-            <Text
-              style={{
-                fontFamily: 'Outfit-Medium',
-                color: PRIOR_FONT_COLOR,
-                fontSize: moderateScale(20),
-              }}>
+            <Text style={stopItemStyles.title}>
               {item?.custom_address_name || item?.address}
             </Text>
-            <Text
-              style={{
-                fontFamily: 'Outfit-Regular',
-                color: LOW_PRIOR_FONT_COLOR,
-                fontSize: moderateScale(15),
-              }}>
+            <Text style={stopItemStyles.time}>
               {moment(item?.estimated_arrival).format('MMM D HH:mm')}
             </Text>
           </View>
@@ -49,7 +27,7 @@ const VisitedStopItem = ({ item }) => {
             size={moderateScale(25)}
           />
         </View>
-        <View style={{ height: verticalScale(22) }} />
+        <View style={stopItemStyles.spacer} />
       </TouchableOpacity>
     </View>
   );

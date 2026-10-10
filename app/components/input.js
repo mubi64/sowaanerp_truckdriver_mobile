@@ -1,5 +1,5 @@
 import { TextInput, View } from 'react-native';
-import { styles } from '../helpers/styles';
+import { styles } from '../styles/common';
 import { LOW_PRIOR_FONT_COLOR, SECONDARY_COLOR } from '../assets/colors/colors';
 import Icon from 'react-native-vector-icons/FontAwesome';
 

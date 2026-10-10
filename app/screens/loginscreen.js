@@ -8,14 +8,35 @@ import {
 } from 'react-native';
 import { StoreItem, GetItem } from '../async-storage/async-storage';
 import { moderateScale } from '../helpers/responsive';
-import { SECONDARY_COLOR } from '../assets/colors/colors';
+import { LOW_PRIOR_FONT_COLOR, SECONDARY_COLOR } from '../assets/colors/colors';
 import Toast from 'react-native-toast-message';
 import { httpPOST } from '../network calls/networkCalls';
 import { useAuth } from '../context/auth-context';
 import Loading from '../components/Loading';
-import { styles } from '../helpers/styles';
+import { loginStyles, loginColors } from '../styles/screens/login.styles';
 import PrimaryGradientButton from '../components/PrimaryGradientButton';
 import { Icon, Input } from '@rneui/themed';
+
+const ICON_SIZE = moderateScale(20);
+
+// Shared props for every form field so they stay visually identical
+const fieldProps = {
+  containerStyle: loginStyles.inputContainer,
+  inputContainerStyle: loginStyles.inputField,
+  inputStyle: loginStyles.inputText,
+  leftIconContainerStyle: loginStyles.leftIcon,
+  placeholderTextColor: loginColors.placeholder,
+  selectionColor: SECONDARY_COLOR,
+  renderErrorMessage: false,
+  autoCapitalize: 'none',
+  autoCorrect: false,
+};
+
+const SWITCH_TRACK = { false: loginColors.switchTrackOff, true: SECONDARY_COLOR };
+
+const FieldIcon = ({ name }) => (
+  <Icon name={name} type="ionicon" color={SECONDARY_COLOR} size={ICON_SIZE} />
+);
 
 const LoginScreen = () => {
   const [passwordSecureEntry, setPasswordSecureEntry] = useState(true);
@@ -77,62 +98,67 @@ const LoginScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.backgroundColor}>
-      <View style={styles.loginContainer}>
-        <View style={styles.logoContainer}>
-          <Image source={require('../assets/images/truck-load.png')} style={styles.logoImageSize} />
+    <ScrollView
+      style={loginStyles.screen}
+      contentContainerStyle={loginStyles.scrollContent}
+      keyboardShouldPersistTaps="handled">
+      <View style={loginStyles.content}>
+        <View style={loginStyles.logoContainer}>
+          <Image
+            source={require('../assets/images/truck-load.png')}
+            style={loginStyles.logoImage}
+            resizeMode="contain"
+          />
         </View>
-        <Text style={styles.appTitle}>{'SowaanERP \n Driver App'}</Text>
-        <Text style={styles.loginPrompt}>Login to your account</Text>
-        <View style={styles.spacer20} />
+        <Text style={loginStyles.appTitle}>SowaanERP</Text>
+        <Text style={loginStyles.appSubtitle}>Driver App</Text>
+        <Text style={loginStyles.loginPrompt}>Login to your account</Text>
         <Input
+          {...fieldProps}
           allowFontScaling={false}
           keyboardType="url"
+          textContentType="URL"
           placeholder="https://erp.sowaan.com"
           value={linkText}
           onChangeText={text => setLinkText(text)}
-          containerStyle={styles.inputContainer}
-          inputContainerStyle={styles.inputStyle}
-          leftIcon={
-            <Icon name="link" type="material" color={SECONDARY_COLOR} size={moderateScale(20)} />
-          }
+          leftIcon={<FieldIcon name="globe-outline" />}
         />
         <Input
+          {...fieldProps}
           keyboardType="email-address"
+          textContentType="emailAddress"
           placeholder="Email"
           value={eemail}
           onChangeText={text => seteEmail(text)}
-          containerStyle={styles.inputContainer}
-          inputContainerStyle={styles.inputStyle}
-          leftIcon={<Icon name="mail" color={SECONDARY_COLOR} size={moderateScale(20)} />}
+          leftIcon={<FieldIcon name="mail-outline" />}
         />
         <Input
+          {...fieldProps}
           placeholder="Password"
+          textContentType="password"
           secureTextEntry={passwordSecureEntry}
-          containerStyle={styles.inputContainer}
-          inputContainerStyle={styles.inputStyle}
-          leftIcon={<Icon name="lock" type="material" color={SECONDARY_COLOR} size={moderateScale(20)} />}
           value={password}
           onChangeText={text => setPassword(text)}
+          leftIcon={<FieldIcon name="lock-closed-outline" />}
           rightIcon={
             <Icon
-              reverse
-              name={passwordSecureEntry ? 'eye' : 'eye-slash'}
-              type="font-awesome-5"
-              color={SECONDARY_COLOR}
-              size={moderateScale(16)}
+              name={passwordSecureEntry ? 'eye-outline' : 'eye-off-outline'}
+              type="ionicon"
+              color={LOW_PRIOR_FONT_COLOR}
+              size={ICON_SIZE}
               onPress={() => setPasswordSecureEntry(!passwordSecureEntry)}
             />
           }
         />
-        <View style={[styles.row, styles.flex_1, styles.itemCenter, styles.inputContainer, styles.flexEnd]}>
-          <Text style={styles.rememberMeText}>Remember me</Text>
+        <View style={loginStyles.rememberRow}>
+          <Text style={loginStyles.rememberText}>Remember me</Text>
           <Switch
+            style={loginStyles.rememberSwitch}
             value={remember}
             onValueChange={() => setRemember(!remember)}
-            trackColor={{ false: '#767577', true: '#81b0ff' }}
-            thumbColor={remember ? '#f4f3f4' : '#f4f3f4'}
-            ios_backgroundColor="#3e3e3e"
+            trackColor={SWITCH_TRACK}
+            thumbColor="#ffffff"
+            ios_backgroundColor={loginColors.switchTrackOff}
           />
         </View>
         <PrimaryGradientButton onPress={signIn} text="Login" />

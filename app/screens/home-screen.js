@@ -3,16 +3,13 @@ import { View, Text, FlatList, TouchableOpacity, RefreshControl } from 'react-na
 import {
   PRIMARY_COLOR,
 } from '../assets/colors/colors';
-import {
-  verticalScale,
-} from '../helpers/responsive';
 import CalendarStrip from 'react-native-calendar-strip-moment-modification';
 import moment from 'moment';
 import { Toast } from 'react-native-toast-message/lib/src/Toast';
 import { useFocusEffect } from '@react-navigation/native';
 import { httpGet } from '../network calls/networkCalls';
 import Loading from '../components/Loading';
-import { styles } from '../helpers/styles';
+import { styles } from '../styles/common';
 import Appbar from '../components/appbar';
 import LinearGradient from 'react-native-linear-gradient';
 import { Image } from 'react-native';
@@ -116,7 +113,7 @@ const HomeScreen = (props) => {
           highlightDateNumberStyle={styles.highlightDateNumberStyle}
         />
       </View>
-      <View style={{ height: verticalScale(10) }} />
+      <View style={styles.spacer10} />
       <Text style={styles.dateText}>{moment().isSame(selectedDate, 'date') ? 'Today' : moment(selectedDate).format('DD MMM, YYYY')}</Text>
       {/* <View style={{ height: verticalScale(10) }} /> */}
       {(load === false) ?
@@ -158,8 +155,8 @@ const HomeScreen = (props) => {
                     <Text style={styles.locationDateText}>{item.delivery_stops.length > 0 ? moment(item.delivery_stops[0].estimated_arrival).format('MMM D HH:mm') : "--"}</Text>
                   </View>
                   <View styles={[styles.mt_10, { flex: 1 }]} >
-                    <Text style={[styles.locationText, { textAlign: 'right' }]} numberOfLines={1} ellipsizeMode="tail">{item.delivery_stops.length > 0 ? item.delivery_stops[item.delivery_stops.length - 1].custom_address_name : "--"}</Text>
-                    <Text style={[styles.locationDateText, { textAlign: 'right' }]}>{item.delivery_stops.length > 0 ? moment(item.delivery_stops[item.delivery_stops.length - 1].estimated_arrival).format('MMM D HH:mm') : "--"}</Text>
+                    <Text style={[styles.locationText, styles.textRight]} numberOfLines={1} ellipsizeMode="tail">{item.delivery_stops.length > 0 ? item.delivery_stops[item.delivery_stops.length - 1].custom_address_name : "--"}</Text>
+                    <Text style={[styles.locationDateText, styles.textRight]}>{item.delivery_stops.length > 0 ? moment(item.delivery_stops[item.delivery_stops.length - 1].estimated_arrival).format('MMM D HH:mm') : "--"}</Text>
                   </View>
                 </View>
               </TouchableOpacity>

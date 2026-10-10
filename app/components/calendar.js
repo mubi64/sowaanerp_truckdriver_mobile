@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, Dimensions,TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { calendarStyles as styles } from '../styles/components/calendar.styles';
 
-const windowWidth = Dimensions.get('window').width;
 const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const getDayName = (year, month, day) => {
@@ -48,46 +48,10 @@ const HorizontalDateCalendar = ({ selectedDate, onSelectDate, year, month }) => 
         horizontal
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item.toString()}
-        contentContainerStyle={{ width: windowWidth }} // Ensures horizontal scrolling
+        contentContainerStyle={styles.listContent}
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 0,
-  },
-  dayNamesRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  dayNameContainer: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  dayName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  dateItem: {
-    borderRadius: 20,
-    padding: 10,
-    marginHorizontal: 5,
-    backgroundColor: 'white',
-    alignItems: 'center',
-  },
-  selectedDateItem: {
-    backgroundColor: 'blue', // Change to your preferred color for selected date
-  },
-  dateText: {
-    textAlign: 'center',
-    fontSize: 16,
-  },
-  selectedDateText: {
-    color: 'white',
-  },
-});
 
 export default HorizontalDateCalendar;
