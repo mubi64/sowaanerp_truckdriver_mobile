@@ -4,72 +4,126 @@ import axios from 'axios';
 import ImageResizer from '@bam.tech/react-native-image-resizer';
 
 
-const getBaseUrl = async () => await GetItem('BASEURL');
+const REQUEST_TIMEOUT_MS = 30000;
 
-const handleResponse = async (response) => {
-  if (!response.ok) {
+export const ERROR_MESSAGES = {
+  noServer: 'Server URL is missing. Please enter it on the login screen.',
+  network: "Can't connect to the server. Check the server URL and your internet connection.",
+  timeout: 'The server took too long to respond. Please try again.',
+  notErp: "This URL doesn't look like a SowaanERP server. Check the server URL.",
+  notFound: 'Server not found at this URL. Check the server URL.',
+  unavailable: 'The server is unavailable right now. Please try again later.',
+  unauthorized: 'Your session has expired. Please log in again.',
+  forbidden: "You don't have permission to do this.",
+  generic: 'Something went wrong. Please try again.',
+};
+
+// "erp.example.com/" -> "https://erp.example.com"
+export const normalizeBaseUrl = (input) => {
+  let url = (input || '').trim().replace(/\/+$/, '');
+  if (!url) {
+    return '';
+  }
+  if (!/^https?:\/\//i.test(url)) {
+    url = `https://${url}`;
+  }
+  return url;
+};
+
+const getBaseUrl = async () => normalizeBaseUrl(await GetItem('BASEURL'));
+
+// Frappe errors can contain HTML, e.g. "<details><summary>Not permitted</summary>...</details>"
+const cleanText = (text) => {
+  const summary = text.match(/<summary>(.*?)<\/summary>/i);
+  return (summary ? summary[1] : text).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+};
+
+// Pull the human-readable message out of a Frappe error body
+const getServerMessage = (body) => {
+  if (!body || typeof body !== 'object') {
+    return '';
+  }
+  if (body._server_messages) {
     try {
-      const errorData = await response.json();
-      throw errorData.message || "Something went wrong!";
-    } catch {
-      throw `HTTP Error ${response.status}`;
-    }
+      const first = JSON.parse(JSON.parse(body._server_messages)[0]);
+      if (first?.message) {
+        return cleanText(first.message);
+      }
+    } catch { }
   }
-  return response.json();
+  if (typeof body.message === 'string' && body.message) {
+    return cleanText(body.message);
+  }
+  if (typeof body.exception === 'string' && body.exception) {
+    // "frappe.exceptions.ValidationError: Message" -> "Message"
+    return cleanText(body.exception.replace(/^[\w.]+:\s*/, ''));
+  }
+  return '';
 };
 
-export const httpGet = async (url) => {
+const statusMessage = (status) => {
+  if (status === 401) {
+    return ERROR_MESSAGES.unauthorized;
+  }
+  if (status === 403) {
+    return ERROR_MESSAGES.forbidden;
+  }
+  if (status === 404) {
+    return ERROR_MESSAGES.notFound;
+  }
+  if (status >= 502 && status <= 504) {
+    return ERROR_MESSAGES.unavailable;
+  }
+  return `${ERROR_MESSAGES.generic} (HTTP ${status})`;
+};
+
+const request = async (method, url, data) => {
+  const BaseUrl = await getBaseUrl();
+  if (!BaseUrl) {
+    return { error: ERROR_MESSAGES.noServer };
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let response;
   try {
-    const BaseUrl = await getBaseUrl();
-    const response = await fetch(`${BaseUrl}${url}`, {
-      method: "GET",
+    response = await fetch(`${BaseUrl}${url}`, {
+      method,
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
+      body: data === undefined ? undefined : JSON.stringify(data),
+      signal: controller.signal,
     });
-
-    // console.log('API response GET:', url, response);
-    return await handleResponse(response);
   } catch (error) {
-    console.error('GET Error on Network line 29:', error);
-    return { error };
+    console.error(`${method} ${url} failed:`, error);
+    return { error: error?.name === 'AbortError' ? ERROR_MESSAGES.timeout : ERROR_MESSAGES.network };
+  } finally {
+    clearTimeout(timer);
   }
-};
 
-export const httpPOST = async (url, data) => {
+  let body;
   try {
-    const BaseUrl = await getBaseUrl();
-    const response = await fetch(`${BaseUrl}${url}`, {
-      method: "POST",
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    });
-
-    console.log('API response POST:', response);
-    return await handleResponse(response);
-  } catch (error) {
-    console.error('POST Error on Network line  47:', error);
-    return { error };
+    body = await response.json();
+  } catch {
+    // HTML or empty body: not a Frappe API response
+    return {
+      error: response.ok ? ERROR_MESSAGES.notErp : statusMessage(response.status),
+      status: response.status,
+    };
   }
+
+  if (!response.ok) {
+    console.error(`${method} ${url} -> ${response.status}`, body?.exception || body?.message);
+    return { error: getServerMessage(body) || statusMessage(response.status), status: response.status };
+  }
+  return body;
 };
 
-export const httpPUT = async (url, data) => {
-  try {
-    const BaseUrl = await getBaseUrl();
-    const response = await fetch(`${BaseUrl}${url}`, {
-      method: "PUT",
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    });
+export const httpGet = (url) => request('GET', url);
 
-    console.log('API response PUT:', response);
-    return await handleResponse(response);
-  } catch (error) {
-    console.error('PUT Error on Network line 65:', error);
-    return { error };
-  }
-};
+export const httpPOST = (url, data) => request('POST', url, data);
+
+export const httpPUT = (url, data) => request('PUT', url, data);
 
 
 export const uploadToERP = async (uri, doctype, name, format) => {

@@ -77,7 +77,7 @@ const Appbar = () => {
                     rounded
                 />
                 <View style={styles.appbarTextContainer}>
-                    <Text style={styles.greeting}>Hello, {employee && employee.first_name.split(" ", 1)}</Text>
+                    <Text style={styles.greeting}>Hello, {employee?.first_name?.split(' ')[0] || ''}</Text>
                     <Text style={styles.appbar_location}>
                         {city || errorMsg || 'Getting location...'}
                     </Text>

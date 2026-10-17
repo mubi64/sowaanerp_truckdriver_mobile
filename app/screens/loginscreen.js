@@ -10,7 +10,7 @@ import { StoreItem, GetItem, DeleteItem } from '../async-storage/async-storage';
 import { moderateScale } from '../helpers/responsive';
 import { LOW_PRIOR_FONT_COLOR, SECONDARY_COLOR } from '../assets/colors/colors';
 import Toast from 'react-native-toast-message';
-import { httpPOST } from '../network calls/networkCalls';
+import { httpPOST, normalizeBaseUrl } from '../network calls/networkCalls';
 import { useAuth } from '../context/auth-context';
 import Loading from '../components/Loading';
 import { loginStyles, loginColors } from '../styles/screens/login.styles';
@@ -18,6 +18,7 @@ import PrimaryGradientButton from '../components/PrimaryGradientButton';
 import { Icon, Input } from '@rneui/themed';
 
 const ICON_SIZE = moderateScale(20);
+const VALID_URL = /^https?:\/\/[^\s/]+\.[^\s/]+/i;
 
 // Shared props for every form field so they stay visually identical
 const fieldProps = {
@@ -59,44 +60,66 @@ const LoginScreen = () => {
         setPassword(passwordStorage);
       }
       if (BaseUrl !== null) {
-        setLinkText(BaseUrl.replace(/^http?:\/\//, ''));
+        setLinkText(normalizeBaseUrl(BaseUrl));
       }
     };
     fetchUrl();
   }, []);
 
+  const showError = (message, title = 'Login failed') => {
+    Toast.show({ type: 'error', position: 'top', text1: title, text2: message });
+  };
+
+  // Returns a message for the first invalid field, or '' when the form is valid
+  const validate = (baseUrl) => {
+    if (!linkText.trim()) {
+      return 'Enter your server URL, e.g. https://erp.sowaan.com';
+    }
+    if (!VALID_URL.test(baseUrl)) {
+      return 'Enter a valid server URL, e.g. https://erp.sowaan.com';
+    }
+    if (!eemail.trim()) {
+      return 'Enter your email.';
+    }
+    if (!password) {
+      return 'Enter your password.';
+    }
+    return '';
+  };
+
   const signIn = async () => {
-    if (eemail === '' || password === '' || linkText === '') {
-      Toast.show({
-        type: 'error',
-        position: 'top',
-        text1: 'Fill all values 👋',
-      });
+    const baseUrl = normalizeBaseUrl(linkText);
+    const validationError = validate(baseUrl);
+    if (validationError) {
+      showError(validationError, 'Missing details');
+      return;
+    }
+
+    setLoad(true);
+    setLinkText(baseUrl);
+    await StoreItem('BASEURL', baseUrl);
+    if (remember) {
+      await StoreItem('EMAIL', eemail.trim());
+      await StoreItem('PASSWORD', password);
     } else {
-      setLoad(true);
-      await StoreItem('BASEURL', `${linkText.trim()}`);
-      if (remember) {
-        await StoreItem('EMAIL', `${eemail.trim()}`);
-        await StoreItem('PASSWORD', `${password.trim()}`);
-      } else {
-        await DeleteItem('EMAIL');
-        await DeleteItem('PASSWORD');
-      }
-      const res = await httpPOST('/api/method/login', {
-        usr: eemail,
-        pwd: password,
-      });
-      if (res.error !== undefined) {
-        Toast.show({
-          type: 'error',
-          position: 'top',
-          text1: `${res.error} 👋`,
-        });
-        setLoad(false);
-      } else {
-        setLoad(false);
-        login(res.full_name);
-      }
+      await DeleteItem('EMAIL');
+      await DeleteItem('PASSWORD');
+    }
+
+    const res = await httpPOST('/api/method/login', {
+      usr: eemail.trim(),
+      pwd: password,
+    });
+    if (res.error) {
+      setLoad(false);
+      showError(res.status === 401 ? 'Incorrect email or password. Please try again.' : res.error);
+      return;
+    }
+
+    const result = await login(res.full_name);
+    setLoad(false);
+    if (result.error) {
+      showError(result.error);
     }
   };
 

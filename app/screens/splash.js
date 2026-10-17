@@ -10,6 +10,7 @@ import { useAuth } from '../context/auth-context';
 import MyTabs from '../navigation/tabnavigation';
 import LoginScreen from './loginscreen';
 import { GetItem } from '../async-storage/async-storage';
+import Toast from 'react-native-toast-message';
 
 const SplashScreen = () => {
   const { user, login } = useAuth();
@@ -21,7 +22,10 @@ const SplashScreen = () => {
       if (!checkedLogin) {
         const isUserLoggedIn = await GetItem('userLoggedIn');
         if (isUserLoggedIn !== null) {
-          login(true); // ✅ Login only once
+          const result = await login(true); // ✅ Login only once
+          if (result.error) {
+            Toast.show({ type: 'error', position: 'top', text1: 'Could not restore your session', text2: result.error });
+          }
         }
         setCheckedLogin(true); // ✅ Flag to prevent loop
         setTimeout(() => setLoad(false), 1500); // Faster splash delay
